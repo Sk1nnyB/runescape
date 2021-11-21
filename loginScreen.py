@@ -1,14 +1,47 @@
 import tkinter as tk
 import os
   
+def data(line):
+	data = ""
+	trigger = 0
+	for i in range (0, len(line)):
+		if trigger == 1:
+			data = data + line[i]
+		if line[i] == ":":
+			trigger = 1
+
+	return(data)
 
 def login():
     usernameFinal= username.get()
     passwordFinal= password.get()
     errorOutput.config(text="")
-    
-    if os.path.exists(os.path.join(os.getcwd(), "accounts", usernameFinal + ".txt")):
-    	pass
+
+    if usernameFinal == "" or usernameFinal.isspace():
+    	errorOutput.config(text="Username cannot be empty")
+    elif passwordFinal == "" or passwordFinal.isspace():
+    	errorOutput.config(text="Password cannot be empty")
+    elif os.path.exists(os.path.join(os.getcwd(), "accounts", usernameFinal + ".txt")):
+    	newFile = open(os.path.join(os.getcwd(), "accounts", usernameFinal + ".txt"), "r")
+    	for i, line in enumerate(newFile):
+    		if i == 0:
+    			usernameFile = data(line)
+    		elif i == 1:
+    			passwordFile = data(line)
+    		elif i > 1:
+    			break
+
+    	newFile.close()
+
+    	if usernameFile != usernameFinal + "\n":
+    		errorOutput.config(text="Username is incorrect")
+    	elif passwordFile != passwordFinal + "\n":
+    		errorOutput.config(text="Password is incorrect")
+    	else:
+    		errorOutput.config(text="Welcome Adventurer!")
+
+
+
     else:
     	errorOutput.config(text="Username does not exist")
     	
@@ -29,8 +62,9 @@ def create():
 	else:
 		newFile = open(os.path.join(os.getcwd(), "accounts", usernameFinal + ".txt"), "w")
 		newFile.write("Username:"+ usernameFinal + "\n")
-		newFile.write("Password:"+ passwordFinal)
+		newFile.write("Password:"+ passwordFinal + "\n")
 		newFile.close()
+		errorOutput.config(text="Account Successfully Created!")
 		
 loginWindow= tk.Tk()
 loginWindow.geometry("600x600")
@@ -46,8 +80,8 @@ nameFetch= tk.Entry(loginWindow,textvariable = username)
 passwordLabel= tk.Label(loginWindow, text = "Password:")
 passwordFetch= tk.Entry(loginWindow, textvariable = password, show = '*')
  
-loginButton= tk.Button(loginWindow,text = 'Submit', command = login)
-accountButton= tk.Button(loginWindow,text = 'Create Account', command = create)
+loginButton= tk.Button(loginWindow,text = "Submit", command = login)
+accountButton= tk.Button(loginWindow,text = "Create Account", command = create)
 
 errorOutput = tk.Label(loginWindow, text = "")
   
