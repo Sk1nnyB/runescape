@@ -142,11 +142,8 @@ def mainScreen():
 	mainWindow.title("Run Escape")
 	mainWindow.resizable(0, 0)
 
-	mainCanvas= tk.Canvas(mainWindow, bg="white", height=720, width=1280)
+	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
-
-	bg_lobby = tk.PhotoImage(file = "grass-g34847fe3c_1280.png")
-	image = mainCanvas.create_image(10, 10, image= bg_lobby)
 
 	mainWindow.mainloop()
 
