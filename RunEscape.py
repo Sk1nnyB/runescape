@@ -114,6 +114,21 @@ def save():
 
 	popup.mainloop()
 
+def leaderboardFloors():
+	pass
+
+def leaderboardHP():
+	pass
+
+def leaderboardAttack():
+	pass
+
+def statsScreen():
+	pass
+
+def inventoryScreen():
+	pass
+
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
 def control(event):
@@ -148,7 +163,7 @@ def statsCollect():
 
 	userFile.close()  
 
-# -=-=-=-=- Functions for making windows -=-=-=-=-
+# -=-=-=-=- Functions for making  main windows -=-=-=-=-
 
 def loginScreen():
 	global loginWindow		
@@ -209,16 +224,24 @@ def mainScreen():
 	menubar = tk.Menu(mainWindow)
 	mainWindow.config(menu=menubar)
 
-	menuSettings = tk.Menu(menubar, tearoff = 0)
-	menuSettings.add_command(label='Exit', command=mainWindow.destroy)
-
 	menuPlayer = tk.Menu(menubar, tearoff = 0)
-	menuPlayer.add_command(label="Save", command=save)
+	menuPlayer.add_command(label="Save", command= save)
+	menuPlayer.add_separator()
+	menuPlayer.add_command(label="Stats", command= statsScreen)
+	menuPlayer.add_command(label="Inventory", command= inventoryScreen)
 
-	menubar.add_cascade(label="Settings", menu=menuSettings)
-	menubar.add_cascade(label="Player", menu=menuPlayer)
+	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
+	menuLeaderboard.add_command(label="Floors", command= leaderboardFloors)
 	
+	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
+	menuLevels.add_command(label="HP", command= leaderboardHP)
+	menuLevels.add_command(label="Attack", command = leaderboardAttack)
+	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
 
+	menubar.add_command(label="Exit", command= mainWindow.destroy)
+	menubar.add_cascade(label="Player", menu= menuPlayer)
+	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
+	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
 
@@ -231,6 +254,7 @@ def mainScreen():
 	mainCanvas.focus_set()
 
 	mainWindow.mainloop()
+
 
 loginScreen()
 mainScreen()
