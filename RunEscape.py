@@ -1,4 +1,4 @@
-# Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torches and tombstone taken from https://pngimg.com/search_image
+# Title screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torches and tombstone taken from https://pngimg.com/search_image
 
 # Resolution: 1280x720 
 
@@ -16,9 +16,7 @@
 import tkinter as tk
 import os 
 
-# -=-=-=-=- General functions -=-=-=-=-
-
-def data(line): # Seperates the number in a file line
+def data(line):
 	data = ""
 	trigger = 0
 	for i in range (0, len(line)):
@@ -27,7 +25,7 @@ def data(line): # Seperates the number in a file line
 		if line[i] == ":":
 			trigger = 1
 
-	return(data) 
+	return(data)
 
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
@@ -84,9 +82,41 @@ def createAccount():
 		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
 		newFile.write("Username:"+ user + "\n")
 		newFile.write("Password:"+ password + "\n")
-		newFile.write("HP:1")
 		newFile.close()
-		errorOutput.config(text="Account Successfully Created!")   
+		errorOutput.config(text="Account Successfully Created!")
+
+# -=-=-=-=- Functions for player -=-=-=-=-
+
+def control(event):
+    coords = gCanvas.coords(pEntity)
+    if event.char == "a":
+        if coords[0] > 0:
+            gCanvas.move(pEntity, -10, 0)
+    elif event.char == "d":
+        if coords[0] < 1280:
+            gCanvas.move(pEntity, 10, 0)
+    elif event.char == "w":
+        if coords[1] > 0:
+            gCanvas.move(pEntity, 0, -10)
+    elif event.char == "s":
+        if coords[1] < 720:
+            gCanvas.move(pEntity, 0, 10)
+
+def statsCollect(user):
+        userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+    
+        for i, line in enumerate(userFile):
+            if i == 2:
+                hp = int(data(line))
+            elif i == 3:
+                attack = int(data(line))
+            elif i > 3:
+                break
+
+        userFile.close()
+        
+        playerStats = [hp, attack]
+        return playerStats
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -134,21 +164,29 @@ def loginScreen():
 	loginWindow.grid_columnconfigure(0, weight=1)
 	loginWindow.grid_columnconfigure(3, weight=1)
 	  
-	loginWindow.mainloop()  
+	loginWindow.mainloop()
+	
+	return  
 
-def mainScreen():		
-	mainWindow = tk.Tk()
-	mainWindow.geometry("1280x720")
-	mainWindow.title("Run Escape")
-	mainWindow.resizable(0, 0)
-
-	mainCanvas= tk.Canvas(mainWindow, bg="white", height=720, width=1280)
-	mainCanvas.pack()
+def mainScreen(user):		
+	gameWindow= tk.Tk()
+	gameWindow.geometry("1280x720")
+	gameWindow.title("Run Escape")
+	gameWindow.resizable(0, 0)
 
 	bg_lobby = tk.PhotoImage(file = "grass-g34847fe3c_1280.png")
-	image = mainCanvas.create_image(10, 10, image= bg_lobby)
+	bg = tk.Label(loginWindow, image=bg_lobby)
+	bg.place(x=0, y=0)
 
-	mainWindow.mainloop()
+	playerModel = tk.PhotoImage(file="player.png")
+	playerModel = playerModel.subsample(5)
+	playerStats = playerStatsCollect("Ben")
+
+	pEntity = gCanvas.create_image(640, 360, anchor="center", image = playerModel)
+	gCanvas.bind("<Key>", control)
+	gCanvas.focus_set()
+
+gWindow.mainloop()
 
 loginScreen()
-mainScreen()
+mainScreen(user)
