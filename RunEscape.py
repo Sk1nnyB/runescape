@@ -1,9 +1,9 @@
-# Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torches and tombstone taken from https://pngimg.com/search_image
-# Dunegeon Door png taken from https://www.pngitem.com/ and allowed for personal use
+# Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torch, tombstone and heart taken from https://pngimg.com/
+# Dunegeon Door png taken from https://www.pngitem.com/ and allowed for personal use, player model taken from https://www.gameart2d.com/the-knight-free-sprites.html
 
-# Resolution: 1280x720 
+# -=-=- Resolution: 1280x720 -=-=-
 
-# Global Variables:
+#  -=-=- Global Variables: -=-=-
 
 # loginWindow = window of the login screen
 # mainWindow = window of the main/game screen
@@ -14,17 +14,19 @@
 # passwordInput = password input field on login screen
 # errorOutput = output label on login screen
 
+# pEntity = player entity in lobby
+# gEntity = player entity in game
+
+# playerModel = player model
+# heartModel = heart model
+
+# menubar = top menu
+
 # -=-=- Stats -=-=-
 # user = username
 # attack = Damage exp of the player
 # hp = hp exp of the player
 # floor = current completed floor of the player
-
-# pEntity = player entity in lobby
-# gEntity = player entity in game
-# playerModel = player model
-
-# menubar = top menu
 
 import tkinter as tk
 from tkinter import messagebox
@@ -45,14 +47,13 @@ def data(line): # Seperates the number in a file line
 	return(data) 
 
 def level(exp): # Converts exp to level
+	
 	if exp < 100:
 		level = 1
-		excess = exp
 	else:
-		level = math.log((exp/100), 1.5) + 2
-		excess = exp - (100 * (1.5**(level + 2)))
+		level = math.trunc(math.log((exp/100), 1.5) + 2)
 
-	return level, excess
+	return level
 
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
@@ -109,7 +110,7 @@ def createAccount():
 		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
 		newFile.write("Username:"+ user + "\n")
 		newFile.write("Password:"+ password + "\n")
-		newFile.write("HP:100\n")
+		newFile.write("HP:0\n")
 		newFile.write("Attack:0\n")
 		newFile.write("Floor:0\n")
 		newFile.close()
@@ -259,7 +260,10 @@ def mainScreen(trigger):
 	global mainWindow	
 	global mainCanvas
 	global menubar
+
 	global playerModel
+	global heartModel
+
 	global pEntity
 	
 	if trigger == 0:
@@ -288,21 +292,28 @@ def mainScreen(trigger):
 		menubar.add_command(label="Exit", command= mainWindow.destroy)
 		menubar.add_cascade(label="Player", menu= menuPlayer)
 		menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
+
+	else:
+		menubar.entryconfig("Player", state = "normal")
+		menubar.entryconfig("Leaderboard", state = "normal")
 	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
 
-	dungeonDoor = tk.PhotoImage(file="dungeon_door.png")
-	dungeonDoor = dungeonDoor.subsample(6)
-	dEntity = mainCanvas.create_image(640, 70, image = dungeonDoor)
-
+	doorModel = tk.PhotoImage(file="dungeon_door.png")
+	doorModel = doorModel.subsample(6)
+	heartModel = tk.PhotoImage(file="heart.png")
+	heartModel = heartModel.subsample(10)
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
-	statsCollect()
 
+	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
 	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
+
 	mainCanvas.bind("<Key>", controlMain)
 	mainCanvas.focus_set()
+
+	statsCollect()
 
 	mainWindow.mainloop()
 
@@ -318,11 +329,17 @@ def floorScreen():
 	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
 	gameCanvas.pack()
 
-	statsCollect()
+	health = level(hp) * 10
+
+	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1))
+	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health)
+	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel)
 	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	gameCanvas.bind("<Key>", controlGame)
 	gameCanvas.focus_set()
+
+	statsCollect()
 
 loginScreen()
 mainScreen(0)
