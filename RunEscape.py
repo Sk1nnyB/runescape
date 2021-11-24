@@ -29,6 +29,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import os 
+import math
 
 # -=-=-=-=- General functions -=-=-=-=-
 
@@ -42,6 +43,16 @@ def data(line): # Seperates the number in a file line
 			trigger = 1
 
 	return(data) 
+
+def level(exp): # Converts exp to level
+	if exp < 100:
+		level = 1
+		excess = exp
+	else:
+		level = math.log((exp/100), 1.5) + 2
+		excess = exp - (100 * (1.5**(level + 2)))
+
+	return level, excess
 
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
@@ -99,7 +110,7 @@ def createAccount():
 		newFile.write("Username:"+ user + "\n")
 		newFile.write("Password:"+ password + "\n")
 		newFile.write("HP:100\n")
-		newFile.write("Attack:100\n")
+		newFile.write("Attack:0\n")
 		newFile.write("Floor:0\n")
 		newFile.close()
 		errorOutput.config(text="Account Successfully Created!")
