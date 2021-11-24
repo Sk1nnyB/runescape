@@ -1,0 +1,192 @@
+# Title screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torches and tombstone taken from https://pngimg.com/search_image
+
+# Resolution: 1280x720 
+
+# Global Variables:
+
+# user = username
+
+# gameWindow = window of the main game
+# loginWindow = window of the login screen
+
+# usernameInput = username input field on login screen
+# passwordInput = password input field on login screen
+# errorOutput = output label on login screen
+
+import tkinter as tk
+import os 
+
+def data(line):
+	data = ""
+	trigger = 0
+	for i in range (0, len(line)):
+		if trigger == 1:
+			data = data + line[i]
+		if line[i] == ":":
+			trigger = 1
+
+	return(data)
+
+# -=-=-=-=- Functions for login screen -=-=-=-=-
+
+def login():
+	global user
+	user = usernameInput.get()
+	password = passwordInput.get()
+
+	errorOutput.config(text="")
+
+	if user == "" or user.isspace():
+		errorOutput.config(text="Username cannot be empty")
+	elif password == "" or password.isspace():
+		errorOutput.config(text="Password cannot be empty")
+	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")):
+		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+		for i, line in enumerate(newFile):
+			if i == 0:
+				usernameFile = data(line)
+			elif i == 1:
+				passwordFile = data(line)
+			elif i > 1:
+				break
+
+		newFile.close()
+
+		if usernameFile != user + "\n":
+			errorOutput.config(text="Username is incorrect")
+		elif passwordFile != password + "\n":
+			errorOutput.config(text="Password is incorrect")
+		else:
+			errorOutput.config(text="Welcome Adventurer!")
+			loginWindow.destroy()
+	else:
+		errorOutput.config(text="Username does not exist")
+
+def createAccount():
+	global user
+
+	user = usernameInput.get()
+	password = passwordInput.get()
+	errorOutput.config(text="")
+
+	if os.path.isdir("accounts") == False:
+		os.mkdir("accounts")
+	
+	if user == "" or user.isspace():
+		errorOutput.config(text="Username cannot be empty")
+	elif password == "" or password.isspace():
+		errorOutput.config(text="Password cannot be empty")
+	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")):
+		errorOutput.config(text="Account Already Exists")
+	else:
+		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
+		newFile.write("Username:"+ user + "\n")
+		newFile.write("Password:"+ password + "\n")
+		newFile.close()
+		errorOutput.config(text="Account Successfully Created!")
+
+# -=-=-=-=- Functions for player -=-=-=-=-
+
+def control(event):
+    coords = gCanvas.coords(pEntity)
+    if event.char == "a":
+        if coords[0] > 0:
+            gCanvas.move(pEntity, -10, 0)
+    elif event.char == "d":
+        if coords[0] < 1280:
+            gCanvas.move(pEntity, 10, 0)
+    elif event.char == "w":
+        if coords[1] > 0:
+            gCanvas.move(pEntity, 0, -10)
+    elif event.char == "s":
+        if coords[1] < 720:
+            gCanvas.move(pEntity, 0, 10)
+
+def statsCollect(user):
+        userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+    
+        for i, line in enumerate(userFile):
+            if i == 2:
+                hp = int(data(line))
+            elif i == 3:
+                attack = int(data(line))
+            elif i > 3:
+                break
+
+        userFile.close()
+        
+        playerStats = [hp, attack]
+        return playerStats
+
+# -=-=-=-=- Functions for making windows -=-=-=-=-
+
+def loginScreen():
+	global loginWindow		
+	loginWindow= tk.Tk()
+	loginWindow.geometry("1280x720")
+	loginWindow.title("Run Escape Login")
+	loginWindow.resizable(0, 0)
+
+	bg_login = tk.PhotoImage(file = "background_login.png")
+	bg = tk.Label(loginWindow, image=bg_login)
+	bg.place(x=0, y=0)
+
+	global usernameInput
+	global passwordInput
+	  
+	usernameInput= tk.StringVar()
+	passwordInput= tk.StringVar()
+
+	nameLabel= tk.Label(loginWindow, text = "Username:")
+	nameFetch= tk.Entry(loginWindow,textvariable = usernameInput)
+
+	passwordLabel= tk.Label(loginWindow, text = "Password:")
+	passwordFetch= tk.Entry(loginWindow, textvariable = passwordInput, show = '*')
+	 
+	loginButton= tk.Button(loginWindow,text = "Submit", command = login)
+	loginWindow.bind("<Return>", login)
+	accountButton= tk.Button(loginWindow,text = "Create Account", command = createAccount)
+
+	global errorOutput
+
+	errorOutput = tk.Label(loginWindow, text = "")
+	  
+	nameLabel.grid(row=1,column=1)
+	nameFetch.grid(row=1,column=2)
+	passwordLabel.grid(row=2,column=1)
+	passwordFetch.grid(row=2,column=2)
+	loginButton.grid(row=4,column=2)
+	accountButton.grid(row=5,column=2)
+	errorOutput.grid(row=6,column=2)
+
+	loginWindow.grid_rowconfigure(0, weight=1)
+	loginWindow.grid_rowconfigure(7, weight=1)
+	loginWindow.grid_columnconfigure(0, weight=1)
+	loginWindow.grid_columnconfigure(3, weight=1)
+	  
+	loginWindow.mainloop()
+	
+	return  
+
+def mainScreen(user):		
+	gameWindow= tk.Tk()
+	gameWindow.geometry("1280x720")
+	gameWindow.title("Run Escape")
+	gameWindow.resizable(0, 0)
+
+	bg_lobby = tk.PhotoImage(file = "grass-g34847fe3c_1280.png")
+	bg = tk.Label(loginWindow, image=bg_lobby)
+	bg.place(x=0, y=0)
+
+	playerModel = tk.PhotoImage(file="player.png")
+	playerModel = playerModel.subsample(5)
+	playerStats = playerStatsCollect("Ben")
+
+	pEntity = gCanvas.create_image(640, 360, anchor="center", image = playerModel)
+	gCanvas.bind("<Key>", control)
+	gCanvas.focus_set()
+
+gWindow.mainloop()
+
+loginScreen()
+mainScreen(user)
