@@ -13,12 +13,13 @@
 
 # -=-=- Stats -=-=-
 # user = username
-# attack = Damage of the player
-# hp = hp LEVEL of the player
+# attack = Damage exp of the player
+# hp = hp exp of the player
 
 # pEntity = player model
 
 import tkinter as tk
+from tkinter import messagebox
 import os 
 
 # -=-=-=-=- General functions -=-=-=-=-
@@ -89,9 +90,29 @@ def createAccount():
 		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
 		newFile.write("Username:"+ user + "\n")
 		newFile.write("Password:"+ password + "\n")
-		newFile.write("HP:1")
+		newFile.write("HP:100\n")
+		newFile.write("Attack:100\n")
 		newFile.close()
 		errorOutput.config(text="Account Successfully Created!")
+
+# -=-=-=-=- Functions for menu -=-=-=-=-  
+
+def save():
+
+	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+	
+	lines = userFile.readlines()
+	lines[2] = "HP:" + str(hp) + "\n"
+	lines[3] = "Attack:" + str(attack) + "\n"
+
+	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
+	userFile.writelines(lines)
+
+	userFile.close()
+
+	tk.messagebox.showinfo("Save confirmed","Save has been confirmed")
+
+	popup.mainloop()
 
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
@@ -184,6 +205,19 @@ def mainScreen():
 	mainWindow.geometry("1280x720")
 	mainWindow.title("Run Escape")
 	mainWindow.resizable(0, 0)
+
+	menubar = tk.Menu(mainWindow)
+	mainWindow.config(menu=menubar)
+
+	menuSettings = tk.Menu(menubar, tearoff = 0)
+	menuSettings.add_command(label='Exit', command=mainWindow.destroy)
+
+	menuPlayer = tk.Menu(menubar, tearoff = 0)
+	menuPlayer.add_command(label="Save", command=save)
+
+	menubar.add_cascade(label="Settings", menu=menuSettings)
+	menubar.add_cascade(label="Player", menu=menuPlayer)
+	
 
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
