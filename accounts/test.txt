@@ -1,4 +1,5 @@
 Username:test
 Password:test
-HP:200
-Attack:200
+HP:100
+Attack:100
+Floor:0

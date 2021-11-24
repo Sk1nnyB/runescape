@@ -1,4 +1,5 @@
 # Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torches and tombstone taken from https://pngimg.com/search_image
+# Dunegeon Door png taken from https://www.pngitem.com/ and allowed for personal use
 
 # Resolution: 1280x720 
 
@@ -15,8 +16,10 @@
 # user = username
 # attack = Damage exp of the player
 # hp = hp exp of the player
+# floor = current completed floor of the player
 
-# pEntity = player model
+# pEntity = player image
+# menubar = top menu
 
 import tkinter as tk
 from tkinter import messagebox
@@ -92,6 +95,7 @@ def createAccount():
 		newFile.write("Password:"+ password + "\n")
 		newFile.write("HP:100\n")
 		newFile.write("Attack:100\n")
+		newFile.write("Floor:0\n")
 		newFile.close()
 		errorOutput.config(text="Account Successfully Created!")
 
@@ -131,25 +135,34 @@ def inventoryScreen():
 
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
-def control(event):
-    coords = mainCanvas.coords(pEntity)
-    if event.char == "a":
-        if coords[0] > 0:
-            mainCanvas.move(pEntity, -10, 0)
-    elif event.char == "d":
-        if coords[0] < 1280:
-            mainCanvas.move(pEntity, 10, 0)
-    elif event.char == "w":
-        if coords[1] > 0:
-            mainCanvas.move(pEntity, 0, -10)
-    elif event.char == "s":
-        if coords[1] < 720:
-            mainCanvas.move(pEntity, 0, 10)
+def controlMain(event):
+	coords = mainCanvas.coords(pEntity)
+
+	if event.char == "a":
+		if coords[0] > 0:
+			mainCanvas.move(pEntity, -10, 0)
+	elif event.char == "d":
+		if coords[0] < 1280:
+			mainCanvas.move(pEntity, 10, 0)
+	elif event.char == "w":
+		if coords[1] > 0:
+			mainCanvas.move(pEntity, 0, -10)
+	elif event.char == "s":
+		if coords[1] < 720:
+			mainCanvas.move(pEntity, 0, 10)
+
+    # Door Detection
+	if coords[1] < 120:
+		if 590 < coords[0] < 690:
+			cont= tk.messagebox.askquestion("Enter the Dungeon","You are entering floor: " + str(floor + 1) + ". Game will autosave but saving will be disabled. Do you want to continue?")
+			if cont=='yes':
+				floorScreen() 		
 
 def statsCollect():
 
 	global hp
 	global attack
+	global floor
 
 	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
 
@@ -158,7 +171,9 @@ def statsCollect():
 			hp = int(data(line))
 		elif i == 3:
 			attack = int(data(line))
-		elif i > 3:
+		elif i == 4:
+			floor = int(data(line))
+		elif i > 4:
 			break
 
 	userFile.close()  
@@ -215,6 +230,7 @@ def mainScreen():
 	
 	global mainCanvas
 	global pEntity
+	global menubar
 
 	mainWindow = tk.Tk()
 	mainWindow.geometry("1280x720")
@@ -245,15 +261,24 @@ def mainScreen():
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
 
+	dungeonDoor = tk.PhotoImage(file="dungeon_door.png")
+	dungeonDoor = dungeonDoor.subsample(6)
+	dEntity = mainCanvas.create_image(640, 70, image = dungeonDoor)
+
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
 	statsCollect()
 
 	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
-	mainCanvas.bind("<Key>", control)
+	mainCanvas.bind("<Key>", controlMain)
 	mainCanvas.focus_set()
 
 	mainWindow.mainloop()
+
+def floorScreen():
+	mainCanvas.destroy()
+	menubar.entryconfig("Player", state = "disabled")
+
 
 
 loginScreen()
