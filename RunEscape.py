@@ -4,14 +4,19 @@
 
 # Global Variables:
 
-# user = username
-
-# gameWindow = window of the main game
 # loginWindow = window of the login screen
+# mainCanvas = canvas of main screen
 
 # usernameInput = username input field on login screen
 # passwordInput = password input field on login screen
 # errorOutput = output label on login screen
+
+# -=-=- Stats -=-=-
+# user = username
+# attack = Damage of the player
+# hp = hp LEVEL of the player
+
+# pEntity = player model
 
 import tkinter as tk
 import os 
@@ -86,7 +91,41 @@ def createAccount():
 		newFile.write("Password:"+ password + "\n")
 		newFile.write("HP:1")
 		newFile.close()
-		errorOutput.config(text="Account Successfully Created!")   
+		errorOutput.config(text="Account Successfully Created!")
+
+# -=-=-=-=- Functions for player -=-=-=-=-   
+
+def control(event):
+    coords = mainCanvas.coords(pEntity)
+    if event.char == "a":
+        if coords[0] > 0:
+            mainCanvas.move(pEntity, -10, 0)
+    elif event.char == "d":
+        if coords[0] < 1280:
+            mainCanvas.move(pEntity, 10, 0)
+    elif event.char == "w":
+        if coords[1] > 0:
+            mainCanvas.move(pEntity, 0, -10)
+    elif event.char == "s":
+        if coords[1] < 720:
+            mainCanvas.move(pEntity, 0, 10)
+
+def statsCollect():
+
+	global hp
+	global attack
+
+	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+
+	for i, line in enumerate(userFile):
+		if i == 2:
+			hp = int(data(line))
+		elif i == 3:
+			attack = int(data(line))
+		elif i > 3:
+			break
+
+	userFile.close()  
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -136,7 +175,11 @@ def loginScreen():
 	  
 	loginWindow.mainloop()  
 
-def mainScreen():		
+def mainScreen():
+	
+	global mainCanvas
+	global pEntity
+
 	mainWindow = tk.Tk()
 	mainWindow.geometry("1280x720")
 	mainWindow.title("Run Escape")
@@ -144,6 +187,14 @@ def mainScreen():
 
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
+
+	playerModel = tk.PhotoImage(file="player.png")
+	playerModel = playerModel.subsample(5)
+	statsCollect()
+
+	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
+	mainCanvas.bind("<Key>", control)
+	mainCanvas.focus_set()
 
 	mainWindow.mainloop()
 
