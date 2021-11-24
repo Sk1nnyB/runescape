@@ -6,7 +6,9 @@
 # Global Variables:
 
 # loginWindow = window of the login screen
+# mainWindow = window of the main/game screen
 # mainCanvas = canvas of main screen
+# gameCanvas = canvas of game screen
 
 # usernameInput = username input field on login screen
 # passwordInput = password input field on login screen
@@ -18,7 +20,10 @@
 # hp = hp exp of the player
 # floor = current completed floor of the player
 
-# pEntity = player image
+# pEntity = player entity in lobby
+# gEntity = player entity in game
+# playerModel = player model
+
 # menubar = top menu
 
 import tkinter as tk
@@ -116,15 +121,7 @@ def save():
 
 	tk.messagebox.showinfo("Save confirmed","Save has been confirmed")
 
-	popup.mainloop()
-
-def leaderboardFloors():
-	pass
-
-def leaderboardHP():
-	pass
-
-def leaderboardAttack():
+def leaderboard(type):
 	pass
 
 def statsScreen():
@@ -156,7 +153,27 @@ def controlMain(event):
 		if 590 < coords[0] < 690:
 			cont= tk.messagebox.askquestion("Enter the Dungeon","You are entering floor: " + str(floor + 1) + ". Game will autosave but saving will be disabled. Do you want to continue?")
 			if cont=='yes':
+				save()
 				floorScreen() 		
+
+def controlGame(event):
+	coords = gameCanvas.coords(gEntity)
+
+	if event.char == "a":
+		if coords[0] > 0:
+			gameCanvas.move(gEntity, -10, 0)
+	elif event.char == "d":
+		if coords[0] < 1280:
+			gameCanvas.move(gEntity, 10, 0)
+	elif event.char == "w":
+		if coords[1] > 0:
+			gameCanvas.move(gEntity, 0, -10)
+	elif event.char == "s":
+		if coords[1] < 720:
+			gameCanvas.move(gEntity, 0, 10)
+	elif event.char == "r":
+		gameCanvas.destroy()
+		mainScreen(1)
 
 def statsCollect():
 
@@ -181,7 +198,12 @@ def statsCollect():
 # -=-=-=-=- Functions for making  main windows -=-=-=-=-
 
 def loginScreen():
-	global loginWindow		
+
+	global loginWindow	
+	global usernameInput
+	global passwordInput
+	global errorOutput
+
 	loginWindow= tk.Tk()
 	loginWindow.geometry("1280x720")
 	loginWindow.title("Run Escape Login")
@@ -190,10 +212,7 @@ def loginScreen():
 	bg_login = tk.PhotoImage(file = "background_login.png")
 	bg = tk.Label(loginWindow, image=bg_login)
 	bg.place(x=0, y=0)
-
-	global usernameInput
-	global passwordInput
-	  
+	
 	usernameInput= tk.StringVar()
 	passwordInput= tk.StringVar()
 
@@ -206,8 +225,6 @@ def loginScreen():
 	loginButton= tk.Button(loginWindow,text = "Submit", command = login)
 	loginWindow.bind("<Return>", login)
 	accountButton= tk.Button(loginWindow,text = "Create Account", command = createAccount)
-
-	global errorOutput
 
 	errorOutput = tk.Label(loginWindow, text = "")
 	  
@@ -226,37 +243,40 @@ def loginScreen():
 	  
 	loginWindow.mainloop()  
 
-def mainScreen():
-	
+def mainScreen(trigger):
+
+	global mainWindow	
 	global mainCanvas
-	global pEntity
 	global menubar
-
-	mainWindow = tk.Tk()
-	mainWindow.geometry("1280x720")
-	mainWindow.title("Run Escape")
-	mainWindow.resizable(0, 0)
-
-	menubar = tk.Menu(mainWindow)
-	mainWindow.config(menu=menubar)
-
-	menuPlayer = tk.Menu(menubar, tearoff = 0)
-	menuPlayer.add_command(label="Save", command= save)
-	menuPlayer.add_separator()
-	menuPlayer.add_command(label="Stats", command= statsScreen)
-	menuPlayer.add_command(label="Inventory", command= inventoryScreen)
-
-	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
-	menuLeaderboard.add_command(label="Floors", command= leaderboardFloors)
+	global playerModel
+	global pEntity
 	
-	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
-	menuLevels.add_command(label="HP", command= leaderboardHP)
-	menuLevels.add_command(label="Attack", command = leaderboardAttack)
-	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
+	if trigger == 0:
+		mainWindow = tk.Tk()
+		mainWindow.geometry("1280x720")
+		mainWindow.title("Run Escape")
+		mainWindow.resizable(0, 0)
 
-	menubar.add_command(label="Exit", command= mainWindow.destroy)
-	menubar.add_cascade(label="Player", menu= menuPlayer)
-	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
+		menubar = tk.Menu(mainWindow)
+		mainWindow.config(menu=menubar)
+
+		menuPlayer = tk.Menu(menubar, tearoff = 0)
+		menuPlayer.add_command(label="Save", command= save)
+		menuPlayer.add_separator()
+		menuPlayer.add_command(label="Stats", command= statsScreen)
+		menuPlayer.add_command(label="Inventory", command= inventoryScreen)
+
+		menuLeaderboard = tk.Menu(menubar, tearoff = 0)
+		menuLeaderboard.add_command(label="Floors", command= leaderboard("floor"))
+		
+		menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
+		menuLevels.add_command(label="HP", command= leaderboard("hp"))
+		menuLevels.add_command(label="Attack", command = leaderboard("attack"))
+		menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
+
+		menubar.add_command(label="Exit", command= mainWindow.destroy)
+		menubar.add_cascade(label="Player", menu= menuPlayer)
+		menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
 	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
@@ -276,10 +296,22 @@ def mainScreen():
 	mainWindow.mainloop()
 
 def floorScreen():
+
+	global gameCanvas
+	global gEntity
+
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
+	menubar.entryconfig("Leaderboard", state = "disabled")
 
+	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
+	gameCanvas.pack()
 
+	statsCollect()
+	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
+
+	gameCanvas.bind("<Key>", controlGame)
+	gameCanvas.focus_set()
 
 loginScreen()
-mainScreen()
+mainScreen(0)
