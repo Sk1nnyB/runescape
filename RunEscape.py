@@ -32,6 +32,7 @@ import tkinter as tk
 from tkinter import messagebox
 import os 
 import math
+import random
 
 # -=-=-=-=- General functions -=-=-=-=-
 
@@ -207,6 +208,45 @@ def statsCollect():
 
 	userFile.close()  
 
+# -=-=-=-=- Functions for slimes -=-=-=-=-
+
+class slime:
+	def __init__(self, type):
+
+		speed = 1 * (1.10 ** floor) * type
+		attack = 1 * (1.10 ** floor) * type
+
+		sModel = tk.PhotoImage(file="slime"+str(type)+".png")
+		sModel = sModel.subsample(15)
+
+		pCoords = mainCanvas.coords(pEntity)
+		xCoord = rand.randInt(0, 1280)
+		yCoord = rand.randInt(0, 720)
+		while (pCoords[0] - 100 < xcoord < pcoords[0] + 100) and (pCoords[1] - 100 < yCoord < pcoords[1] + 100):
+			xCoord = rand.randInt(0, 1280)
+			yCoord = rand.randInt(0, 720)
+		sEntity =  gameCanvas.create_image(xCoord, yCoord, image = sModel)
+
+
+	def move():
+
+		pCoords = mainCanvas.coords(pEntity)
+		sCoords = mainCanvas.coords(self.sEntity)
+		
+		if pCoords[0] > sCoords[0]:
+			gameCanvas.move(self.sEntity, 10, 0)
+
+		elif pCoords[0] < sCoords[0]:
+			gameCanvas.move(self.sEntity, -10, 0)
+
+		if pCoords[1] > sCoords[1]:
+			gameCanvas.move(self.sEntity, 0, 10)
+
+		elif pCoords[1] < sCoords[1]:
+			gameCanvas.move(self.sEntity, 0, -10)
+
+
+
 # -=-=-=-=- Functions for making  main windows -=-=-=-=-
 
 def loginScreen():
@@ -331,9 +371,9 @@ def floorScreen():
 
 	health = level(hp) * 10
 
-	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1))
-	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health)
-	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel)
+	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1)).lift()
+	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health).lift()
+	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel).lift()
 	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	gameCanvas.bind("<Key>", controlGame)
