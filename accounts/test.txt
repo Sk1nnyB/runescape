@@ -2,10 +2,10 @@ Username:test
 Password:test
 HP:455
 Attack:455
-Woodcutting:220
+Woodcutting:250
 Mining:0
 Crafting:0
 Floor:5
-Wood:3
+Wood:7
 Sword Level:0
 SwordLevel:1

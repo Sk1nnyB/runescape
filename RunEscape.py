@@ -157,11 +157,16 @@ def createAccount():
 # -=-=-=-=- Functions for main screen -=-=-=-=-
 
 def mainScreenHit(coords):
+	global movx
+	global movy
+
 	doorCoords = mainCanvas.bbox(dEntity)
 	treeCoords = mainCanvas.bbox(tEntity)
 	
 	if doorCoords[0] < coords[0] < doorCoords[2]:
 		if doorCoords[1] < coords[1] < doorCoords[3]:
+			movx = 0
+			movy = 0
 			prompt= tk.messagebox.askquestion("Enter the Dungeon","You are entering floor: " + str(floor + 1) + ". Game will autosave but saving will be disabled. Do you want to continue?")
 			if prompt=='yes':
 				save()
@@ -169,9 +174,40 @@ def mainScreenHit(coords):
 
 	if treeCoords[0] < coords[0] < treeCoords[2]:
 		if treeCoords[1] < coords[1] < treeCoords[3]:
+			movx = 0
+			movy = 0
 			prompt= tk.messagebox.askquestion("Woodcutting","Would you like to chop wood?")
-			if prompt=='yes':
+			if prompt=="yes":
 				skilling("woodcutting")
+			if prompt=="no":
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
+
+def mainPress(event):
+	global direction
+	global movx
+	global movy 
+
+	coords = mainCanvas.coords(pEntity)
+
+	if event.char == "a" and coords[0] > 0 :
+		direction = "left"
+		movx = -10
+	elif event.char == "d" and coords[0] < 1280:
+		direction = "right"
+		movx = 10
+	elif event.char == "w" and coords[1] > 0:
+		direction = "up"
+		movy = -10
+	elif event.char == "s" and coords[1] < 720:
+		direction = "down"
+		movy = 10
 
 # -=-=-=-=- Functions for menu -=-=-=-=-  
 
@@ -357,23 +393,6 @@ def gamePress(event):
 
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
-def controlMain(event):
-	coords = mainCanvas.coords(pEntity)
-	if event.char == "a":
-		if coords[0] > 0:
-			mainCanvas.move(pEntity, -10, 0)
-	elif event.char == "d":
-		if coords[0] < 1280:
-			mainCanvas.move(pEntity, 10, 0)
-	elif event.char == "w":
-		if coords[1] > 0:
-			mainCanvas.move(pEntity, 0, -10)
-	elif event.char == "s":
-		if coords[1] < 720:
-			mainCanvas.move(pEntity, 0, 10)
-
-	mainScreenHit(coords)
-
 def statsCollect():
 
 	global hp
@@ -473,6 +492,12 @@ def keyRelease(event):
 
 	movx = 0
 	movy = 0
+
+def mainMove():
+	coords = mainCanvas.coords(pEntity)
+	mainScreenHit(coords)
+	mainCanvas.move(pEntity, movx, movy)
+	mainCanvas.after(30, mainMove)
 
 def gameMove():
 
@@ -612,6 +637,10 @@ def mainScreen():
 	global pEntity
 	global dEntity
 	global tEntity
+
+	global movx
+	global movy
+	global direction
 	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
@@ -664,8 +693,15 @@ def mainScreen():
 	
 	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
-	mainCanvas.bind("<Key>", controlMain)
+	mainCanvas.bind("<KeyPress>", mainPress)
+	mainCanvas.bind("<KeyRelease>", keyRelease)
 	mainCanvas.focus_set()
+
+	direction = "right"
+	movx = 0
+	movy = 0
+
+	mainMove()
 
 	mainWindow.mainloop()
 
@@ -697,7 +733,6 @@ def floorScreen():
 	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1))
 	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health)
 	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel)
-	start = [640, 360]
 	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	statsCollect()
@@ -706,7 +741,6 @@ def floorScreen():
 	direction = "right"
 	movx = 0
 	movy = 0
-
 
 	gameMove()
 
