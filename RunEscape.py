@@ -1,4 +1,4 @@
-# Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torch, tombstone, tree and heart taken from https://pngimg.com/
+# Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torch, tombstone, tree, stone and heart taken from https://pngimg.com/
 # Dunegeon Door png taken from https://www.pngitem.com/ and allowed for personal use, player model taken from https://www.gameart2d.com/the-knight-free-sprites.html
 
 # -=-=- Resolution: 1280x720 -=-=-
@@ -178,8 +178,7 @@ def mainScreenHit(coords):
 			movy = 0
 			prompt= tk.messagebox.askquestion("Woodcutting","Would you like to chop wood?")
 			if prompt=="yes":
-				skilling("woodcutting")
-			if prompt=="no":
+				skillingActivity("woodcutting")
 				if direction == "left":
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
@@ -196,16 +195,16 @@ def mainPress(event):
 
 	coords = mainCanvas.coords(pEntity)
 
-	if event.char == "a" and coords[0] > 0 :
+	if event.char == "a" and skilling == 0 and coords[0] > 0 :
 		direction = "left"
 		movx = -10
-	elif event.char == "d" and coords[0] < 1280:
+	elif event.char == "d" and skilling == 0 and coords[0] < 1280:
 		direction = "right"
 		movx = 10
-	elif event.char == "w" and coords[1] > 0:
+	elif event.char == "w" and skilling == 0 and coords[1] > 0:
 		direction = "up"
 		movy = -10
-	elif event.char == "s" and coords[1] < 720:
+	elif event.char == "s" and skilling == 0 and coords[1] < 720:
 		direction = "down"
 		movy = 10
 
@@ -431,7 +430,7 @@ def statsCollect():
 
 	userFile.close()  
 
-def skilling(skill):
+def skillingActivity(skill):
 
 	global woodcutting
 	global mining 
@@ -440,12 +439,13 @@ def skilling(skill):
 	global metal
 	global swordLevel
 
-	if skill == "woodcutting":
+	global skilling
+	global movx
+	global movy
 
-		mainCanvas.destroy()
-		pauseCanvas= tk.Canvas(mainWindow, bg="brown", height=720, width=1280)
-		pauseCanvas.pack()
-		healthText = pauseCanvas.create_text(640, 360, fill= "green", font = ('Helvetica','50','bold'), text="Game is paused.\n You are woodcutting.")			
+	skilling = 1
+
+	if skill == "woodcutting":		
 			
 		delay = random.randint(2, 5)
 
@@ -471,19 +471,33 @@ def skilling(skill):
 			loadingBar['value'] += 20
 			time.sleep(delay/5)
 			if i == 4:
+				skilling = 0
+				movx = 0
+				movy = 0 # would auto save here but I need to prove the user can save so :/
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
+				mainMove()
+				
 				loadingPopup.destroy()
+
 				newLevel = level(woodcutting)
 				expLeft = (100 * (1.5 ** (newLevel - 1))) - woodcutting
 
-				message = "You have cut "+ str(newWood) + " wood!\nYou have earnt " + str(exp) + " exp!\nYou are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
+				message = "You have cut "+ str(newWood) + " wood!\nYou have earnt " + str(exp) + " exp!\n"
+				message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
 
 				finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
 
-				pauseCanvas.destroy() # would auto save here but I need to prove the user can save so :/
-				mainScreen()
-
 		loadingPopup.mainloop()
 
+	
+						
 # -=-=-=-=- Functions for movement -=-=-=-=-  
 
 def keyRelease(event):
@@ -641,6 +655,7 @@ def mainScreen():
 	global movx
 	global movy
 	global direction
+	global skilling
 	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
@@ -697,6 +712,7 @@ def mainScreen():
 	mainCanvas.bind("<KeyRelease>", keyRelease)
 	mainCanvas.focus_set()
 
+	skilling = 0
 	direction = "right"
 	movx = 0
 	movy = 0
