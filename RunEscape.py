@@ -237,19 +237,23 @@ class slime:
 			gameCanvas.move(self.sEntity, 0, -3*self.type)
 
 def playerAttack(coords):
-	attacking = 1
+	
+	global attacking
 
-	attackFrames = [attackFrame1, attackFrame2, attackFrame3, attackFrame4, attackFrame5, attackFrame6, attackFrame7, attackFrame8, attackFrame9, attackFrame10]
+	if attacking == 0:
+		attacking = 1
 
-	for frame in attackFrames:
-		gameCanvas.itemconfig(gEntity, image=frame)
+		attackFrames = [attackFrame1, attackFrame2, attackFrame3, attackFrame4, attackFrame5, attackFrame6, attackFrame7, attackFrame8, attackFrame9, attackFrame10]
+
+		for frame in attackFrames:
+			gameCanvas.itemconfig(gEntity, image=frame)
+			mainWindow.update()
+			time.sleep(0.01)
+
+		gameCanvas.itemconfig(gEntity, image=playerModel)
 		mainWindow.update()
-		time.sleep(0.1)
-
-	gameCanvas.itemconfig(gEntity, image=playerModel)
-	mainWindow.update()
-			
-	attacking = 0
+				
+		attacking = 0
 
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
@@ -274,20 +278,20 @@ def controlGame(event):
 	coords = gameCanvas.coords(gEntity)
 
 	if event.char == "a":
-		if coords[0] > 0:
+		if coords[0] > 0 and attacking == 0:
 			gameCanvas.move(gEntity, -10, 0)
-	elif event.char == "d":
+	elif event.char == "d" and attacking == 0:
 		if coords[0] < 1280:
 			gameCanvas.move(gEntity, 10, 0)
-	elif event.char == "w":
+	elif event.char == "w" and attacking == 0:
 		if coords[1] > 0:
 			gameCanvas.move(gEntity, 0, -10)
-	elif event.char == "s":
+	elif event.char == "s" and attacking == 0:
 		if coords[1] < 720:
 			gameCanvas.move(gEntity, 0, 10)
-	elif event.char == "u":
+	elif event.char == "u" and attacking == 0:
 		playerAttack(coords)
-	elif event.char == "r":
+	elif event.char == "r" and attacking == 0:
 		gameCanvas.destroy()
 		mainScreen(1)
 
