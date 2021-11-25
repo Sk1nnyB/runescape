@@ -23,6 +23,7 @@
 # playerModel = player model
 # heartModel = heart model
 # attackFrameX = attack model frame x (1 - 10)
+# slimeList = list of all slimes on the screen
 
 # mov(x/y) = velocity of x/y
 
@@ -239,6 +240,7 @@ class slime:
 		pCoords = gameCanvas.coords(gEntity)
 		xCoord = random.randint(0, 1280)
 		yCoord = random.randint(0, 720)
+		self.sCoords = [xCoord, yCoord]
 		while (pCoords[0] - 100 < xCoord < pCoords[0] + 100) and (pCoords[1] - 100 < yCoord < pCoords[1] + 100):
 			xCoord = random.randint(0, 1280)
 			yCoord = random.randint(0, 720)
@@ -278,16 +280,42 @@ class slime:
 def playerAttack(coords):
 	
 	global attacking
+	global slimeList
+	global direction
 
 	if attacking == 0:
 		attacking = 1
+		pCoords = coords
+		count = 0
 
 		attackFrames = [attackFrame1, attackFrame2, attackFrame3, attackFrame4, attackFrame5, attackFrame6, attackFrame7, attackFrame8, attackFrame9, attackFrame10]
 
 		for frame in attackFrames:
+			count = count + 1
 			gameCanvas.itemconfig(gEntity, image=frame)
 			mainWindow.update()
 			time.sleep(0.04)
+			if count == 5:
+				for slime in slimeList:
+					if direction == "left":
+						if (pCoords[0] - 120 < slime.sCoords[0] < pCoords[0]) and (pCoords[1] - 30 < slime.sCoords[1] < pCoords[1] + 60):
+							gameCanvas.delete(slime.sEntity)
+							slimeList.remove(slime)
+					elif direction == "up":
+						if (pCoords[1] - 120 < slime.sCoords[1] < pCoords[1]) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
+							gameCanvas.delete(slime.sEntity)
+							slimeList.remove(slime)
+					elif direction == "down":
+						if (pCoords[1] < slime.sCoords[1] < pCoords[1] + 120) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
+							gameCanvas.delete(slime.sEntity)
+							slimeList.remove(slime)
+					else:
+						if (pCoords[0] < slime.sCoords[0] < pCoords[0] + 120) and (pCoords[1] - 30 < slime.sCoords[1] < pCoords[1] + 60):
+							gameCanvas.delete(slime.sEntity)
+							slimeList.remove(slime)
+
+				if len(slimeList) == 0:
+					print("You win")
 
 		gameCanvas.itemconfig(gEntity, image=playerModel)
 		mainWindow.update()
@@ -621,6 +649,7 @@ def floorScreen():
 	global healthText
 	global movx
 	global movy
+	global slimeList
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
