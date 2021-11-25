@@ -38,6 +38,8 @@
 # swordLevel = sword level of the player
 
 # attacking = if the user is currently in attack animation
+# health = current health of the user
+# healthText = health ui output
 
 import tkinter as tk
 from tkinter import messagebox
@@ -194,21 +196,37 @@ class slime:
 	def __init__(self, type):
 
 		self.type = type
-		self.attack = 0.5 * (floor  + 1) * type
-		self.health = 0.5 * (floor  + 1) * type
 
 		if type == 1:
 			self.sModel = slimeModel1
+			self.attack = 1
+			self.health = 10
+			self.speed = 2
 		if type == 2:
 			self.sModel = slimeModel2
+			self.attack = 2
+			self.health = 40
+			self.speed = 3
 		if type == 3:
 			self.sModel = slimeModel3
+			self.attack = 5
+			self.health = 100
+			self.speed = 4
 		if type == 4:
 			self.sModel = slimeModel4
+			self.attack = 10
+			self.health = 200
+			self.speed = 6
 		if type == 5:
 			self.sModel = slimeModel5
+			self.attack = 15
+			self.health = 400
+			self.speed = 9
 		if type == 6:
 			self.sModel = slimeModel6
+			self.attack = 25
+			self.health = 700
+			self.speed = 12
 
 		pCoords = gameCanvas.coords(gEntity)
 		xCoord = random.randint(0, 1280)
@@ -221,20 +239,36 @@ class slime:
 
 	def move(self):
 
+		global health
+
 		pCoords = gameCanvas.coords(gEntity)
 		self.sCoords = gameCanvas.coords(self.sEntity)
 
 		if pCoords[0] > self.sCoords[0]:
-			gameCanvas.move(self.sEntity, 3*self.type, 0)
+			gameCanvas.move(self.sEntity, self.speed, 0)
+			slimeDirection = "right"
 
 		elif pCoords[0] < self.sCoords[0]:
-			gameCanvas.move(self.sEntity, -3*self.type, 0)
+			gameCanvas.move(self.sEntity, -self.speed, 0)
+			slimeDirection = "left"
 
 		if pCoords[1] > self.sCoords[1]:
-			gameCanvas.move(self.sEntity, 0, 3*self.type)
+			gameCanvas.move(self.sEntity, 0, self.speed)
+			slimeDirection = "down"
 
 		elif pCoords[1] < self.sCoords[1]:
-			gameCanvas.move(self.sEntity, 0, -3*self.type)
+			gameCanvas.move(self.sEntity, 0, -self.speed)
+			slimeDirection = "up"
+
+		pHitBox = gameCanvas.bbox(gEntity)
+		if pHitBox[0] < self.sCoords[0] < pHitBox[2]:
+			if pHitBox[1] < self.sCoords[1] < pHitBox[3]:
+				
+				health = health - self.attack
+				gameCanvas.itemconfig(healthText,text=health)
+
+				if health <= 0:
+					print("Game over")
 
 def playerAttack(coords):
 	
@@ -248,7 +282,7 @@ def playerAttack(coords):
 		for frame in attackFrames:
 			gameCanvas.itemconfig(gEntity, image=frame)
 			mainWindow.update()
-			time.sleep(0.01)
+			time.sleep(0.04)
 
 		gameCanvas.itemconfig(gEntity, image=playerModel)
 		mainWindow.update()
@@ -388,6 +422,14 @@ def skilling(skill):
 				mainScreen(1)
 
 		loadingPopup.mainloop()
+
+# -=-=-=-=- Functions for movement -=-=-=-=-  
+
+def keyPress(event):
+	pass
+
+def keyRelease(event):
+	pass
 
 # -=-=-=-=- Functions for making  main windows -=-=-=-=-
 
@@ -566,6 +608,8 @@ def floorScreen():
 	global gameCanvas
 	global gEntity
 	global attacking
+	global health
+	global healthText
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
