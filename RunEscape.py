@@ -19,6 +19,7 @@
 # gEntity = player entity in game
 # dEntity = door entity in lobby
 # tEntity = tree entity in lobby
+# oEntity = ore entity in lobby
 # aimTriangle = triangle used to aim in game
 
 # playerModel = player model
@@ -162,6 +163,7 @@ def mainScreenHit(coords):
 
 	doorCoords = mainCanvas.bbox(dEntity)
 	treeCoords = mainCanvas.bbox(tEntity)
+	oreCoords = mainCanvas.bbox(oEntity)
 	
 	if doorCoords[0] < coords[0] < doorCoords[2]:
 		if doorCoords[1] < coords[1] < doorCoords[3]:
@@ -179,6 +181,22 @@ def mainScreenHit(coords):
 			prompt= tk.messagebox.askquestion("Woodcutting","Would you like to chop wood?")
 			if prompt=="yes":
 				skillingActivity("woodcutting")
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
+
+	if oreCoords[0] < coords[0] < oreCoords[2]:
+		if oreCoords[1] < coords[1] < oreCoords[3]:
+			movx = 0
+			movy = 0
+			prompt= tk.messagebox.askquestion("Mining","Would you like to mine metal?")
+			if prompt=="yes":
+				skillingActivity("mining")
 				if direction == "left":
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
@@ -447,7 +465,7 @@ def skillingActivity(skill):
 
 	if skill == "woodcutting":		
 			
-		delay = random.randint(2, 5)
+		delay = random.randint(2, 4)
 
 		newWood = (round(level(woodcutting) * 1.3))
 		exp = (10 * level(woodcutting))
@@ -496,8 +514,57 @@ def skillingActivity(skill):
 
 		loadingPopup.mainloop()
 
-	
-						
+	if skill == "mining":		
+			
+		delay = random.randint(2, 4)
+
+		newOre = (round(level(mining) * 1.3))
+		exp = (10 * level(mining))
+
+		metal = metal + newOre
+		mining = mining + exp
+
+		loadingPopup = tk.Tk()
+		loadingPopup.title("Mining")
+		loadingPopup.geometry("150x100")
+		
+		loadingBar = Progressbar(loadingPopup, orient = HORIZONTAL, length = 100, mode = "determinate")
+
+		loadingBar.place(x=25, y=20)
+
+		skillLabel = tk.Label(loadingPopup, text = "Mining...")
+		skillLabel.place(x=25 ,y=40)
+		
+		for i in range(5):
+			loadingPopup.update_idletasks()
+			loadingBar['value'] += 20
+			time.sleep(delay/5)
+			if i == 4:
+				skilling = 0
+				movx = 0
+				movy = 0 # would auto save here but I need to prove the user can save so :/
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
+				mainMove()
+				
+				loadingPopup.destroy()
+
+				newLevel = level(mining)
+				expLeft = (100 * (1.5 ** (newLevel - 1))) - mining
+
+				message = "You have mined "+ str(newOre) + " metal!\nYou have earnt " + str(exp) + " exp!\n"
+				message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
+
+				finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
+
+		loadingPopup.mainloop()
+				
 # -=-=-=-=- Functions for movement -=-=-=-=-  
 
 def keyRelease(event):
@@ -629,7 +696,7 @@ def mainScreen():
 
 	global playerModel
 	global heartModel
-	global treeModel
+
 	global attackFrame1
 	global attackFrame2
 	global attackFrame3
@@ -651,6 +718,7 @@ def mainScreen():
 	global pEntity
 	global dEntity
 	global tEntity
+	global oEntity 
 
 	global movx
 	global movy
@@ -666,6 +734,8 @@ def mainScreen():
 	heartModel = heartModel.subsample(10)
 	treeModel = tk.PhotoImage(file="tree.png")
 	treeModel = treeModel.subsample(2)
+	oreModel = tk.PhotoImage(file="ore.png")
+	oreModel = oreModel.subsample(10)
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
 
@@ -705,6 +775,7 @@ def mainScreen():
 
 	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
 	tEntity = mainCanvas.create_image(1200, 360, image = treeModel)
+	oEntity = mainCanvas.create_image(80, 390, image = oreModel)
 	
 	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
