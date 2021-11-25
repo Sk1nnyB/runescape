@@ -2,10 +2,10 @@ Username:test
 Password:test
 HP:0
 Attack:0
-Woodcutting:20
+Woodcutting:220
 Mining:0
 Crafting:0
 Floor:0
-Wood:2
+Wood:3
 Sword Level:0
 SwordLevel:1

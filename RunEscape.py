@@ -9,6 +9,7 @@
 # mainWindow = window of the main/game screen
 # mainCanvas = canvas of main screen
 # gameCanvas = canvas of game screen
+# deathCanvas = canvas of death screen
 
 # usernameInput = username input field on login screen
 # passwordInput = password input field on login screen
@@ -22,6 +23,8 @@
 # playerModel = player model
 # heartModel = heart model
 # attackFrameX = attack model frame x (1 - 10)
+
+# mov(x/y) = velocity of x/y
 
 # menubar = top menu
 
@@ -38,6 +41,7 @@
 # swordLevel = sword level of the player
 
 # attacking = if the user is currently in attack animation
+# direction = the current facing direction of the player
 # health = current health of the user
 # healthText = health ui output
 
@@ -71,6 +75,10 @@ def level(exp): # Converts exp to level
 		level = math.trunc(math.log((exp/100), 1.5) + 2)
 
 	return level
+
+def deathAccept(event): # Moves player back to lobby
+	deathCanvas.destroy()
+	mainScreen()
 
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
@@ -266,10 +274,7 @@ class slime:
 				
 				health = health - self.attack
 				gameCanvas.itemconfig(healthText,text=health)
-
-				if health <= 0:
-					print("Game over")
-
+		
 def playerAttack(coords):
 	
 	global attacking
@@ -289,6 +294,26 @@ def playerAttack(coords):
 				
 		attacking = 0
 
+def gamePress(event):
+	global direction
+	coords = gameCanvas.coords(gEntity)
+
+	if event.char == "a" and attacking == 0 and coords[0] > 0 :
+		direction = "left"
+		movx = -10
+	elif event.char == "d" and attacking == 0 and coords[0] < 1280:
+		direction = "right"
+		movx = 10
+	elif event.char == "w" and attacking == 0 and coords[1] > 0:
+		print("test")
+		direction = "up"
+		movy = -10
+	elif event.char == "s" and attacking == 0 and coords[1] < 720:
+		direction = "down"
+		movy = 10
+	elif event.char == "u" and attacking == 0:
+		playerAttack(coords)
+
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
 def controlMain(event):
@@ -307,27 +332,6 @@ def controlMain(event):
 			mainCanvas.move(pEntity, 0, 10)
 
 	mainScreenHit(coords)
-			
-def controlGame(event):
-	coords = gameCanvas.coords(gEntity)
-
-	if event.char == "a":
-		if coords[0] > 0 and attacking == 0:
-			gameCanvas.move(gEntity, -10, 0)
-	elif event.char == "d" and attacking == 0:
-		if coords[0] < 1280:
-			gameCanvas.move(gEntity, 10, 0)
-	elif event.char == "w" and attacking == 0:
-		if coords[1] > 0:
-			gameCanvas.move(gEntity, 0, -10)
-	elif event.char == "s" and attacking == 0:
-		if coords[1] < 720:
-			gameCanvas.move(gEntity, 0, 10)
-	elif event.char == "u" and attacking == 0:
-		playerAttack(coords)
-	elif event.char == "r" and attacking == 0:
-		gameCanvas.destroy()
-		mainScreen(1)
 
 def statsCollect():
 
@@ -388,8 +392,8 @@ def skilling(skill):
 			
 		delay = random.randint(2, 5)
 
-		newWood = (round(woodcutting * 1.3))
-		exp = (5 * woodcutting)
+		newWood = (round(level(woodcutting) * 1.3))
+		exp = (10 * level(woodcutting))
 
 		wood = wood + newWood
 		woodcutting = woodcutting + exp
@@ -419,21 +423,25 @@ def skilling(skill):
 				finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
 
 				pauseCanvas.destroy() # would auto save here but I need to prove the user can save so :/
-				mainScreen(1)
+				mainScreen()
 
 		loadingPopup.mainloop()
 
 # -=-=-=-=- Functions for movement -=-=-=-=-  
 
-def keyPress(event):
-	pass
-
 def keyRelease(event):
-	pass
+	global movx
+	global movy
 
-# -=-=-=-=- Functions for making  main windows -=-=-=-=-
+	movx = 0
+	movy = 0
 
-def loginScreen():
+def playerMove():
+	gameCanvas.move(gEntity, movx, movy)
+
+# -=-=-=-=- Functions for making windows -=-=-=-=-
+
+def loginWindow():
 
 	global loginWindow	
 	global usernameInput
@@ -479,11 +487,46 @@ def loginScreen():
 	  
 	loginWindow.mainloop()  
 
-def mainScreen(trigger):
-
-	global mainWindow	
-	global mainCanvas
+def mainWindow():
+	
+	global mainWindow
 	global menubar
+
+	mainWindow = tk.Tk()
+	mainWindow.geometry("1280x720")
+	mainWindow.title("Run Escape")
+	mainWindow.resizable(0, 0)
+
+	menubar = tk.Menu(mainWindow)
+	mainWindow.config(menu=menubar)
+
+	menuPlayer = tk.Menu(menubar, tearoff = 0)
+	menuPlayer.add_command(label="Save", command= save)
+	menuPlayer.add_separator()
+	menuPlayer.add_command(label="Stats", command= statsScreen)
+	menuPlayer.add_command(label="Inventory", command= inventoryScreen)
+
+	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
+	menuLeaderboard.add_command(label="Floors", command= leaderboard("floor"))
+	
+	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
+	menuLevels.add_command(label="HP", command= leaderboard("hp"))
+	menuLevels.add_command(label="Attack", command = leaderboard("attack"))
+	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
+
+	menubar.add_command(label="Exit", command= mainWindow.destroy)
+	menubar.add_cascade(label="Player", menu= menuPlayer)
+	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
+
+	statsCollect()
+
+	mainScreen()
+
+# -=-=-=-=- Functions for making screens -=-=-=-=-
+
+def mainScreen():
+	
+	global mainCanvas
 
 	global playerModel
 	global heartModel
@@ -510,39 +553,6 @@ def mainScreen(trigger):
 	global dEntity
 	global tEntity
 	
-	if trigger == 0:
-		mainWindow = tk.Tk()
-		mainWindow.geometry("1280x720")
-		mainWindow.title("Run Escape")
-		mainWindow.resizable(0, 0)
-
-		menubar = tk.Menu(mainWindow)
-		mainWindow.config(menu=menubar)
-
-		menuPlayer = tk.Menu(menubar, tearoff = 0)
-		menuPlayer.add_command(label="Save", command= save)
-		menuPlayer.add_separator()
-		menuPlayer.add_command(label="Stats", command= statsScreen)
-		menuPlayer.add_command(label="Inventory", command= inventoryScreen)
-
-		menuLeaderboard = tk.Menu(menubar, tearoff = 0)
-		menuLeaderboard.add_command(label="Floors", command= leaderboard("floor"))
-		
-		menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
-		menuLevels.add_command(label="HP", command= leaderboard("hp"))
-		menuLevels.add_command(label="Attack", command = leaderboard("attack"))
-		menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
-
-		menubar.add_command(label="Exit", command= mainWindow.destroy)
-		menubar.add_cascade(label="Player", menu= menuPlayer)
-		menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
-
-		statsCollect()
-
-	else:
-		menubar.entryconfig("Player", state = "normal")
-		menubar.entryconfig("Leaderboard", state = "normal")
-	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
 
@@ -555,7 +565,6 @@ def mainScreen(trigger):
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
 
-	
 	attackFrame1 = tk.PhotoImage(file = "attack1.png")
 	attackFrame1 = attackFrame1.subsample(5)
 	attackFrame2 = tk.PhotoImage(file = "attack2.png")
@@ -593,10 +602,7 @@ def mainScreen(trigger):
 	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
 	tEntity = mainCanvas.create_image(1200, 360, image = treeModel)
 	
-	if trigger == 1:
-		pEntity = mainCanvas.create_image(1130, 400, anchor="center", image = playerModel)
-	else:
-		pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
+	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	mainCanvas.bind("<Key>", controlMain)
 	mainCanvas.focus_set()
@@ -610,6 +616,8 @@ def floorScreen():
 	global attacking
 	global health
 	global healthText
+	global movx
+	global movy
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
@@ -617,6 +625,7 @@ def floorScreen():
 
 	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
 	gameCanvas.pack()
+	gameCanvas.focus_set()
 
 	health = level(hp) * 10
 
@@ -626,12 +635,15 @@ def floorScreen():
 	start = [640, 360]
 	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
-	gameCanvas.bind("<Key>", controlGame)
-	gameCanvas.focus_set()
-
 	statsCollect()
+	
 	attacking = 0
+	movx = 0
+	movy = 0
 
+	gameCanvas.bind("<KeyPress>", gamePress)
+	gameCanvas.bind("<KeyRelease>", keyRelease)
+	
 	types = []
 
 	for i in range(10*(floor+1)):
@@ -667,7 +679,8 @@ def floorScreen():
 	slimeCount = 1
 	count = 0
 
-	while True: 
+	while health > 0: 
+		playerMove()
 		for entity in slimeList:
 			entity.move()
 		mainWindow.update()
@@ -677,6 +690,23 @@ def floorScreen():
 			count = 0
 			slimeList.append(slime(types[0]))
 			slimeCount = slimeCount + 1
+		
+	deathScreen()
 
-loginScreen()
-mainScreen(0)
+def deathScreen():
+
+	global deathCanvas
+
+	gameCanvas.destroy()
+	menubar.entryconfig("Player", state = "normal")
+	menubar.entryconfig("Leaderboard", state = "normal")
+
+	deathCanvas= tk.Canvas(mainWindow, bg="black", height=720, width=1280)
+	deathCanvas.focus_set()
+	deathCanvas.bind("<Key>", deathAccept)
+	deathCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','50','bold'), text="You died...\nPress any key to return to safety.")
+	deathCanvas.pack()
+	
+
+loginWindow()
+mainWindow()
