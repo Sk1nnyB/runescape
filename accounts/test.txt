@@ -1,11 +1,11 @@
 Username:test
 Password:test
-HP:0
-Attack:0
+HP:455
+Attack:455
 Woodcutting:220
 Mining:0
 Crafting:0
-Floor:0
+Floor:5
 Wood:3
 Sword Level:0
 SwordLevel:1

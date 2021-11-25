@@ -19,6 +19,7 @@
 # gEntity = player entity in game
 # dEntity = door entity in lobby
 # tEntity = tree entity in lobby
+# aimTriangle = triangle used to aim in game
 
 # playerModel = player model
 # heartModel = heart model
@@ -26,6 +27,8 @@
 # slimeList = list of all slimes on the screen
 
 # mov(x/y) = velocity of x/y
+
+# floorExp = exp gained from that floor
 
 # menubar = top menu
 
@@ -77,8 +80,11 @@ def level(exp): # Converts exp to level
 
 	return level
 
-def deathAccept(event): # Moves player back to lobby
-	deathCanvas.destroy()
+def endAccept(event): # Moves player back to lobby
+	try:
+		deathCanvas.destroy()
+	except:
+		victoryCanvas.destroy()
 	mainScreen()
 
 # -=-=-=-=- Functions for login screen -=-=-=-=-
@@ -210,32 +216,32 @@ class slime:
 			self.sModel = slimeModel1
 			self.attack = 1
 			self.health = 10
-			self.speed = 2
+			self.speed = 4
 		if type == 2:
 			self.sModel = slimeModel2
 			self.attack = 2
 			self.health = 40
-			self.speed = 3
+			self.speed = 6
 		if type == 3:
 			self.sModel = slimeModel3
 			self.attack = 5
 			self.health = 100
-			self.speed = 4
+			self.speed = 10
 		if type == 4:
 			self.sModel = slimeModel4
 			self.attack = 10
 			self.health = 200
-			self.speed = 6
+			self.speed = 14
 		if type == 5:
 			self.sModel = slimeModel5
 			self.attack = 15
 			self.health = 400
-			self.speed = 9
+			self.speed = 18
 		if type == 6:
 			self.sModel = slimeModel6
 			self.attack = 25
 			self.health = 700
-			self.speed = 12
+			self.speed = 25
 
 		pCoords = gameCanvas.coords(gEntity)
 		xCoord = random.randint(0, 1280)
@@ -256,26 +262,34 @@ class slime:
 
 		if pCoords[0] > self.sCoords[0]:
 			gameCanvas.move(self.sEntity, self.speed, 0)
-			slimeDirection = "right"
+			self.slimeDirectionX = "right"
 
 		elif pCoords[0] < self.sCoords[0]:
 			gameCanvas.move(self.sEntity, -self.speed, 0)
-			slimeDirection = "left"
+			self.slimeDirectionX = "left"
 
 		if pCoords[1] > self.sCoords[1]:
 			gameCanvas.move(self.sEntity, 0, self.speed)
-			slimeDirection = "down"
+			self.slimeDirectionY = "down"
 
 		elif pCoords[1] < self.sCoords[1]:
 			gameCanvas.move(self.sEntity, 0, -self.speed)
-			slimeDirection = "up"
+			self.slimeDirectionY = "up"
 
 		pHitBox = gameCanvas.bbox(gEntity)
 		if pHitBox[0] < self.sCoords[0] < pHitBox[2]:
 			if pHitBox[1] < self.sCoords[1] < pHitBox[3]:
-				
 				health = health - self.attack
 				gameCanvas.itemconfig(healthText,text=health)
+				rebound = (self.speed * 18)
+				if self.slimeDirectionX == "right":
+					gameCanvas.coords(self.sEntity, self.sCoords[0] - rebound, self.sCoords[1])
+				elif self.slimeDirectionX == "left":
+					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] + rebound)
+				if self.slimeDirectionY == "down":
+					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] - rebound)
+				elif self.slimeDirectionY == "up":
+					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] + rebound) 
 		
 def playerAttack(coords):
 	
@@ -313,9 +327,6 @@ def playerAttack(coords):
 						if (pCoords[0] < slime.sCoords[0] < pCoords[0] + 120) and (pCoords[1] - 30 < slime.sCoords[1] < pCoords[1] + 60):
 							gameCanvas.delete(slime.sEntity)
 							slimeList.remove(slime)
-
-				if len(slimeList) == 0:
-					print("You win")
 
 		gameCanvas.itemconfig(gEntity, image=playerModel)
 		mainWindow.update()
@@ -403,12 +414,9 @@ def statsCollect():
 
 def skilling(skill):
 
-	global hp
-	global attack
 	global woodcutting
 	global mining 
 	global crafting
-	global floor
 	global wood
 	global metal
 	global swordLevel
@@ -466,9 +474,30 @@ def keyRelease(event):
 	movx = 0
 	movy = 0
 
-def playerMove():
+def gameMove():
+
+	global aimTriangle
+
 	gameCanvas.move(gEntity, movx, movy)
-	gameCanvas.after(10, playerMove)
+	pCoords = gameCanvas.coords(gEntity)
+
+	if direction == "left":
+		coords = [pCoords[0] - 70, pCoords[1], pCoords[0] - 50, pCoords[1] - 20, pCoords[0] - 50, pCoords[1] + 20]
+	elif direction == "down":
+		coords = [pCoords[0], pCoords[1] + 90, pCoords[0] - 20, pCoords[1] + 70, pCoords[0] + 20, pCoords[1] + 70]
+	elif direction == "up":
+		coords = [pCoords[0], pCoords[1] - 90, pCoords[0] - 20, pCoords[1] - 70, pCoords[0] + 20, pCoords[1] - 70]
+	else:
+		coords = [pCoords[0] + 70, pCoords[1], pCoords[0] + 50, pCoords[1] - 20, pCoords[0] + 50, pCoords[1] + 20]
+	
+	try:
+		gameCanvas.delete(aimTriangle)
+	except:
+		pass
+
+	aimTriangle = gameCanvas.create_polygon(coords, fill="red",outline="black")
+
+	gameCanvas.after(10, gameMove)
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -644,16 +673,20 @@ def floorScreen():
 
 	global gameCanvas
 	global gEntity
-	global attacking
+	
 	global health
 	global healthText
+	
 	global movx
 	global movy
+	global direction
+	global attacking
+	
 	global slimeList
+	global floorExp
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
-	menubar.entryconfig("Leaderboard", state = "disabled")
 
 	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
 	gameCanvas.pack()
@@ -670,61 +703,69 @@ def floorScreen():
 	statsCollect()
 	
 	attacking = 0
+	direction = "right"
 	movx = 0
 	movy = 0
 
-	playerMove()
+
+	gameMove()
 
 	gameCanvas.bind("<KeyPress>", gamePress)
 	gameCanvas.bind("<KeyRelease>", keyRelease)
 	
 	types = []
+	floorExp = 0
 
-	for i in range(10*(floor+1)):
-		if floor > 5:
+	for i in range(10 + 2*(floor)):
+		if floor  >= 5:
 			type = random.randint(1,2)
-		elif floor > 10:
+		elif floor  >= 10:
 			type = random.randint(1,3)
-		elif floor > 20:
+		elif floor >= 20:
 			type = random.randint(1,4)
-		elif floor > 30:
+		elif floor >= 30:
 			type = random.randint(2,4)
-		elif floor > 40:
+		elif floor >= 40:
 			type = random.randint(2,4)
-		elif floor > 50:
+		elif floor >= 50:
 			type = random.randint(2,5)
-		elif floor > 75:
+		elif floor >= 75:
 			type = random.randint(3,5)
-		elif floor > 100:
+		elif floor >= 100:
 			type = random.randint(3,6)
-		elif floor > 150:
+		elif floor >= 150:
 			type = random.randint(4,6)
-		elif floor > 200:
+		elif floor >= 200:
 			type = random.randint(5,6)
-		elif floor > 250:
+		elif floor >= 250:
 			type = 6
 		else:
 			type = 1
 
 		types.append(type)
+
+		floorExp = floorExp + type * 3
 		
 	slimeList = []
 	slimeList.append(slime(types[0]))
 	slimeCount = 1
 	count = 0
 
-	while health > 0: 
+	while health > 0 and len(slimeList) > 0: 
 		for entity in slimeList:
 			entity.move()
 		mainWindow.update()
 		time.sleep(0.1)
 		count = count + 1
-		if count >= 20/(floor + 1) and slimeCount != 10*(floor+1):
+		if count >= 20/(floor + 1) and slimeCount != 10 + 2*floor:
 			count = 0
-			slimeList.append(slime(types[0]))
+			slimeList.append(slime(types[slimeCount]))
 			slimeCount = slimeCount + 1
-		
-	deathScreen()
+	
+	if health < 0:
+		deathScreen()
+	elif len(slimeList) == 0:
+		victoryScreen()
 
 def deathScreen():
 
@@ -732,14 +773,42 @@ def deathScreen():
 
 	gameCanvas.destroy()
 	menubar.entryconfig("Player", state = "normal")
-	menubar.entryconfig("Leaderboard", state = "normal")
 
 	deathCanvas= tk.Canvas(mainWindow, bg="black", height=720, width=1280)
 	deathCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','50','bold'), text="You died...\nPress any key to return to safety.")
 	deathCanvas.focus_set()
 	deathCanvas.pack()
 	time.sleep(0.4)
-	deathCanvas.bind("<Key>", deathAccept)
+	deathCanvas.bind("<Key>", endAccept)
+
+def victoryScreen():
+
+	global victoryCanvas
+
+	global floor
+	global attack
+	global hp
+
+	gameCanvas.destroy()
+	menubar.entryconfig("Player", state = "normal")
+
+	floor = floor + 1
+	hp = hp + floorExp
+	attack = attack + floorExp
+	expLeftHP = (100 * (1.5 ** (level(hp) - 1))) - attack
+	expLeftAttack = (100 * (1.5 ** (level(attack) - 1))) - attack
+
+	victoryCanvas= tk.Canvas(mainWindow, bg="gold", height=720, width=1280)
+	message = "You beat floor: " + str(floor) + "!\n"
+	message = message + "You earnt " + str(floorExp) + " exp in attack and hp from this floor.\n"
+	message = message + "Your HP is now level " + str(level(hp)) + " with " + str(expLeftHP) + " exp until the next level!\n"
+	message = message + "Your attack is now level " + str(level(attack)) + " with " + str(expLeftAttack) + " exp until the next level!\n"
+	message = message + "Press any key to return to safety."
+	victoryCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','25','bold'), text=message)
+	victoryCanvas.focus_set()
+	victoryCanvas.pack()
+	time.sleep(0.4)
+	victoryCanvas.bind("<Key>", endAccept)
 	
 loginWindow()
 mainWindow()
