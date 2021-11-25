@@ -296,6 +296,9 @@ def playerAttack(coords):
 
 def gamePress(event):
 	global direction
+	global movx
+	global movy 
+
 	coords = gameCanvas.coords(gEntity)
 
 	if event.char == "a" and attacking == 0 and coords[0] > 0 :
@@ -305,7 +308,6 @@ def gamePress(event):
 		direction = "right"
 		movx = 10
 	elif event.char == "w" and attacking == 0 and coords[1] > 0:
-		print("test")
 		direction = "up"
 		movy = -10
 	elif event.char == "s" and attacking == 0 and coords[1] < 720:
@@ -438,6 +440,7 @@ def keyRelease(event):
 
 def playerMove():
 	gameCanvas.move(gEntity, movx, movy)
+	gameCanvas.after(10, playerMove)
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -641,6 +644,8 @@ def floorScreen():
 	movx = 0
 	movy = 0
 
+	playerMove()
+
 	gameCanvas.bind("<KeyPress>", gamePress)
 	gameCanvas.bind("<KeyRelease>", keyRelease)
 	
@@ -680,7 +685,6 @@ def floorScreen():
 	count = 0
 
 	while health > 0: 
-		playerMove()
 		for entity in slimeList:
 			entity.move()
 		mainWindow.update()
@@ -702,11 +706,11 @@ def deathScreen():
 	menubar.entryconfig("Leaderboard", state = "normal")
 
 	deathCanvas= tk.Canvas(mainWindow, bg="black", height=720, width=1280)
-	deathCanvas.focus_set()
-	deathCanvas.bind("<Key>", deathAccept)
 	deathCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','50','bold'), text="You died...\nPress any key to return to safety.")
+	deathCanvas.focus_set()
 	deathCanvas.pack()
+	time.sleep(0.4)
+	deathCanvas.bind("<Key>", deathAccept)
 	
-
 loginWindow()
 mainWindow()
