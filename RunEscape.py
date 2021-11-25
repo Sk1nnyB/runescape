@@ -16,9 +16,12 @@
 
 # pEntity = player entity in lobby
 # gEntity = player entity in game
+# dEntity = door entity in lobby
+# tEntity = tree entity in lobby
 
 # playerModel = player model
 # heartModel = heart model
+# attackFrameX = attack model frame x (1 - 10)
 
 # menubar = top menu
 
@@ -33,6 +36,8 @@
 # wood = wood of the player
 # metal = metal of the player
 # swordLevel = sword level of the player
+
+# attacking = if the user is currently in attack animation
 
 import tkinter as tk
 from tkinter import messagebox
@@ -135,15 +140,18 @@ def createAccount():
 # -=-=-=-=- Functions for main screen -=-=-=-=-
 
 def mainScreenHit(coords):
-	if coords[1] < 120:
-		if 590 < coords[0] < 690:
+	doorCoords = mainCanvas.bbox(dEntity)
+	treeCoords = mainCanvas.bbox(tEntity)
+	
+	if doorCoords[0] < coords[0] < doorCoords[2]:
+		if doorCoords[1] < coords[1] < doorCoords[3]:
 			prompt= tk.messagebox.askquestion("Enter the Dungeon","You are entering floor: " + str(floor + 1) + ". Game will autosave but saving will be disabled. Do you want to continue?")
 			if prompt=='yes':
 				save()
 				floorScreen() 
 
-	if coords[0] > 1080:
-		if 320 < coords[1] < 450:
+	if treeCoords[0] < coords[0] < treeCoords[2]:
+		if treeCoords[1] < coords[1] < treeCoords[3]:
 			prompt= tk.messagebox.askquestion("Woodcutting","Would you like to chop wood?")
 			if prompt=='yes':
 				skilling("woodcutting")
@@ -180,6 +188,69 @@ def statsScreen():
 def inventoryScreen():
 	pass
 
+# -=-=-=-=- Functions for game window -=-=-=-=-
+
+class slime:
+	def __init__(self, type):
+
+		self.type = type
+		self.attack = 0.5 * (floor  + 1) * type
+		self.health = 0.5 * (floor  + 1) * type
+
+		if type == 1:
+			self.sModel = slimeModel1
+		if type == 2:
+			self.sModel = slimeModel2
+		if type == 3:
+			self.sModel = slimeModel3
+		if type == 4:
+			self.sModel = slimeModel4
+		if type == 5:
+			self.sModel = slimeModel5
+		if type == 6:
+			self.sModel = slimeModel6
+
+		pCoords = gameCanvas.coords(gEntity)
+		xCoord = random.randint(0, 1280)
+		yCoord = random.randint(0, 720)
+		while (pCoords[0] - 100 < xCoord < pCoords[0] + 100) and (pCoords[1] - 100 < yCoord < pCoords[1] + 100):
+			xCoord = random.randint(0, 1280)
+			yCoord = random.randint(0, 720)
+
+		self.sEntity =  gameCanvas.create_image(xCoord, yCoord, image = self.sModel)
+
+	def move(self):
+
+		pCoords = gameCanvas.coords(gEntity)
+		self.sCoords = gameCanvas.coords(self.sEntity)
+
+		if pCoords[0] > self.sCoords[0]:
+			gameCanvas.move(self.sEntity, 3*self.type, 0)
+
+		elif pCoords[0] < self.sCoords[0]:
+			gameCanvas.move(self.sEntity, -3*self.type, 0)
+
+		if pCoords[1] > self.sCoords[1]:
+			gameCanvas.move(self.sEntity, 0, 3*self.type)
+
+		elif pCoords[1] < self.sCoords[1]:
+			gameCanvas.move(self.sEntity, 0, -3*self.type)
+
+def playerAttack(coords):
+	attacking = 1
+
+	attackFrames = [attackFrame1, attackFrame2, attackFrame3, attackFrame4, attackFrame5, attackFrame6, attackFrame7, attackFrame8, attackFrame9, attackFrame10]
+
+	for frame in attackFrames:
+		gameCanvas.itemconfig(gEntity, image=frame)
+		mainWindow.update()
+		time.sleep(0.1)
+
+	gameCanvas.itemconfig(gEntity, image=playerModel)
+	mainWindow.update()
+			
+	attacking = 0
+
 # -=-=-=-=- Functions for player -=-=-=-=-   
 
 def controlMain(event):
@@ -196,8 +267,6 @@ def controlMain(event):
 	elif event.char == "s":
 		if coords[1] < 720:
 			mainCanvas.move(pEntity, 0, 10)
-
-	print(coords)
 
 	mainScreenHit(coords)
 			
@@ -216,6 +285,8 @@ def controlGame(event):
 	elif event.char == "s":
 		if coords[1] < 720:
 			gameCanvas.move(gEntity, 0, 10)
+	elif event.char == "u":
+		playerAttack(coords)
 	elif event.char == "r":
 		gameCanvas.destroy()
 		mainScreen(1)
@@ -277,7 +348,7 @@ def skilling(skill):
 		pauseCanvas.pack()
 		healthText = pauseCanvas.create_text(640, 360, fill= "green", font = ('Helvetica','50','bold'), text="Game is paused.\n You are woodcutting.")			
 			
-		delay = random.randint(8, 15)
+		delay = random.randint(2, 5)
 
 		newWood = (round(woodcutting * 1.3))
 		exp = (5 * woodcutting)
@@ -309,60 +380,10 @@ def skilling(skill):
 
 				finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
 
-				pauseCanvas.destroy()
+				pauseCanvas.destroy() # would auto save here but I need to prove the user can save so :/
 				mainScreen(1)
 
 		loadingPopup.mainloop()
-
-# -=-=-=-=- Functions for slimes -=-=-=-=-
-
-class slime:
-	def __init__(self, type):
-
-		self.speed = 1 * (1.10 ** floor) * type
-		self.attack = 1 * (1.10 ** floor) * type
-		self.health = 10 * (1.10 ** floor) * type
-
-		if type == 1:
-			self.sModel = slimeModel1
-		if type == 2:
-			self.sModel = slimeModel2
-		if type == 3:
-			self.sModel = slimeModel3
-		if type == 4:
-			self.sModel = slimeModel4
-		if type == 5:
-			self.sModel = slimeModel5
-		if type == 6:
-			self.sModel = slimeModel6
-
-		pCoords = gameCanvas.coords(gEntity)
-		xCoord = random.randint(0, 1280)
-		yCoord = random.randint(0, 720)
-		while (pCoords[0] - 100 < xCoord < pCoords[0] + 100) and (pCoords[1] - 100 < yCoord < pCoords[1] + 100):
-			xCoord = random.randint(0, 1280)
-			yCoord = random.randint(0, 720)
-
-		self.sEntity =  gameCanvas.create_image(xCoord, yCoord, image = self.sModel)
-
-	def move(self):
-
-		pCoords = gameCanvas.coords(gEntity)
-		self.sCoords = gameCanvas.coords(self.sEntity)
-	
-		if pCoords[0] > self.sCoords[0]:
-			gameCanvas.move(self.sEntity, 10, 0)
-
-		elif pCoords[0] < self.sCoords[0]:
-			gameCanvas.move(self.sEntity, -10, 0)
-
-		if pCoords[1] > self.sCoords[1]:
-			gameCanvas.move(self.sEntity, 0, 10)
-
-		elif pCoords[1] < self.sCoords[1]:
-			gameCanvas.move(self.sEntity, 0, -10)
-
-		time.sleep(2/((1.10**floor)*speed))
 
 # -=-=-=-=- Functions for making  main windows -=-=-=-=-
 
@@ -421,6 +442,16 @@ def mainScreen(trigger):
 	global playerModel
 	global heartModel
 	global treeModel
+	global attackFrame1
+	global attackFrame2
+	global attackFrame3
+	global attackFrame4
+	global attackFrame5
+	global attackFrame6
+	global attackFrame7
+	global attackFrame8
+	global attackFrame9
+	global attackFrame10
 
 	global slimeModel1
 	global slimeModel2
@@ -430,6 +461,8 @@ def mainScreen(trigger):
 	global slimeModel6
 
 	global pEntity
+	global dEntity
+	global tEntity
 	
 	if trigger == 0:
 		mainWindow = tk.Tk()
@@ -458,6 +491,8 @@ def mainScreen(trigger):
 		menubar.add_cascade(label="Player", menu= menuPlayer)
 		menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
 
+		statsCollect()
+
 	else:
 		menubar.entryconfig("Player", state = "normal")
 		menubar.entryconfig("Leaderboard", state = "normal")
@@ -474,6 +509,28 @@ def mainScreen(trigger):
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
 
+	
+	attackFrame1 = tk.PhotoImage(file = "attack1.png")
+	attackFrame1 = attackFrame1.subsample(5)
+	attackFrame2 = tk.PhotoImage(file = "attack2.png")
+	attackFrame2 = attackFrame2.subsample(5)
+	attackFrame3 = tk.PhotoImage(file = "attack3.png")
+	attackFrame3 = attackFrame3.subsample(5)
+	attackFrame4 = tk.PhotoImage(file = "attack4.png")
+	attackFrame4 = attackFrame4.subsample(5)
+	attackFrame5 = tk.PhotoImage(file = "attack5.png")
+	attackFrame5 = attackFrame5.subsample(5)
+	attackFrame6 = tk.PhotoImage(file = "attack6.png")
+	attackFrame6 = attackFrame6.subsample(5)
+	attackFrame7 = tk.PhotoImage(file = "attack7.png")
+	attackFrame7 = attackFrame7.subsample(5)
+	attackFrame8 = tk.PhotoImage(file = "attack8.png")
+	attackFrame8 = attackFrame8.subsample(5)
+	attackFrame9 = tk.PhotoImage(file = "attack9.png")
+	attackFrame9 = attackFrame9.subsample(5)
+	attackFrame10 = tk.PhotoImage(file = "attack10.png")
+	attackFrame10 = attackFrame10.subsample(5)
+		
 	slimeModel1 = tk.PhotoImage(file="jelly1.png")
 	slimeModel1 = slimeModel1.subsample(5)
 	slimeModel2 = tk.PhotoImage(file="jelly2.png")
@@ -489,6 +546,7 @@ def mainScreen(trigger):
 
 	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
 	tEntity = mainCanvas.create_image(1200, 360, image = treeModel)
+	
 	if trigger == 1:
 		pEntity = mainCanvas.create_image(1130, 400, anchor="center", image = playerModel)
 	else:
@@ -497,14 +555,13 @@ def mainScreen(trigger):
 	mainCanvas.bind("<Key>", controlMain)
 	mainCanvas.focus_set()
 
-	statsCollect()
-
 	mainWindow.mainloop()
 
 def floorScreen():
 
 	global gameCanvas
 	global gEntity
+	global attacking
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
@@ -518,24 +575,18 @@ def floorScreen():
 	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1))
 	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health)
 	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel)
+	start = [640, 360]
 	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	gameCanvas.bind("<Key>", controlGame)
 	gameCanvas.focus_set()
 
 	statsCollect()
+	attacking = 0
 
-	sModel = tk.PhotoImage(file="jelly1.png")
-	sModel = sModel.subsample(100)
+	types = []
 
-	pCoords = gameCanvas.coords(gEntity)
-	xCoord = random.randint(0, 1280)
-	yCoord = random.randint(0, 720)
-	while (pCoords[0] - 100 < xCoord < pCoords[0] + 100) and (pCoords[1] - 100 < yCoord < pCoords[1] + 100):
-		xCoord = random.randint(0, 1280)
-		yCoord = random.randint(0, 720)
-
-	for i in range(math.trunc(10*(1.50**floor))):
+	for i in range(10*(floor+1)):
 		if floor > 5:
 			type = random.randint(1,2)
 		elif floor > 10:
@@ -560,8 +611,24 @@ def floorScreen():
 			type = 6
 		else:
 			type = 1
+
+		types.append(type)
 		
-		newSlime = slime(type)
+	slimeList = []
+	slimeList.append(slime(types[0]))
+	slimeCount = 1
+	count = 0
+
+	while True: 
+		for entity in slimeList:
+			entity.move()
+		mainWindow.update()
+		time.sleep(0.1)
+		count = count + 1
+		if count >= 20/(floor + 1) and slimeCount != 10*(floor+1):
+			count = 0
+			slimeList.append(slime(types[0]))
+			slimeCount = slimeCount + 1
 
 loginScreen()
 mainScreen(0)
