@@ -1209,10 +1209,10 @@ def mainScreen():
 	slimeModel6 = slimeModel6.subsample(5)
 
 	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
-	tEntity = mainCanvas.create_image(1200, 360, image = treeModel)
+	tEntity = mainCanvas.create_image(1150, 360, image = treeModel)
 	oEntity = mainCanvas.create_image(80, 390, image = oreModel)
 	aEntity = mainCanvas.create_image(780, 660, image = anvilModel)
-	sEntity = mainCanvas.create_image(500, 640, image = standModel)
+	sEntity = mainCanvas.create_image(520, 630, image = standModel)
 	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	mainCanvas.bind("<KeyPress>", mainPress)
