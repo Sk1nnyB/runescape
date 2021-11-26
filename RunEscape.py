@@ -731,8 +731,8 @@ def statsCollect(): # Collect the stats for the player and store in global varia
 			break  # Stop the program (will save memory)
 
 	userFile.close() # Stop reading from the file once all stats have been obtained   
-
-def skillingActivity(activity):
+ 
+def skillingActivity(activity): # Allows the user to skill at an entity
 
 	global woodcutting # Get the current values for each skill
 	global mining 
@@ -778,7 +778,7 @@ def skillingActivity(activity):
 
 		loadingPopup = tk.Tk() # Generate the popup screen for the skill
 		loadingPopup.title(activity) # Set the correct title
-		loadingPopup.geometry("150x110") # Ensure it only encapsulates the progress bar and text
+		loadingPopup.geometry("200x150") # Ensure it only encapsulates the progress bar and text
 		
 		loadingBar = Progressbar(loadingPopup, orient = HORIZONTAL, length = 100, mode = "determinate") # Set up the progress bar so that it works in stages
 		# This could also be continuous but I chose it for aethetical purposes 
@@ -844,6 +844,10 @@ def skillingActivity(activity):
 		elif equipmentT == "armour": # If they were upgrading their armour
 			crafting = skill # Update crafting stat
 			armourLevel = equipment # And the correct equipment
+
+		if activity == "Crafting":
+			wood = wood - equipment
+			metal = metal - equipment 
 
 		finishPopup = tk.messagebox.showinfo(title="Completed", message= message) # Then show them the message with their gain message
 
