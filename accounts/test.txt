@@ -1,12 +1,12 @@
 Username:test
 Password:test
-HP:0
-Attack:0
-Woodcutting:10
-Mining:20
-Crafting:10
+HP:3800
+Attack:3800
+Woodcutting:3800
+Mining:3800
+Crafting:3800
 Floor:0
-Wood:1
-Metal:9
+Wood:0
+Metal:0
 Sword Level:1
-Armour Level:2
+Armour Level:1

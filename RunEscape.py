@@ -5,6 +5,19 @@
 
 # -=-=- Resolution: 1280x720 -=-=-
 
+# -=-=- CHEAT GUIDE -=-=-
+# On main menu (key):
+# 1 = 10 levels in HP
+# 2 = 10 levels in Attack
+# 3 = 10 levels in Woodcutting
+# 4 = 10 levels in Mining
+# 5 = 10 levels in Crafting
+# 6 = 25 floors
+# 7 = 100 wood
+# 8 = 100 metal
+# 9 = 10 sword levels
+# 0 = 10 armour levels
+
 #  -=-=- Global Variables: -=-=-
 
 # loginWindow = window of the login screen
@@ -40,8 +53,8 @@
 
 # -=-=- Stat File -=-=-
 # user = username
-# attack = Damage exp of the player
 # hp = hp exp of the player
+# attack = Damage exp of the player
 # woodcutting = woodcutting exp of the player
 # mining = mining exp of the player
 # crafting = crafting exp of the player
@@ -270,8 +283,20 @@ def mainScreenHit(coords):
 
 def mainPress(event):
 	global direction
+	global controls
 	global movx
 	global movy 
+
+	global hp
+	global attack
+	global woodcutting
+	global mining 
+	global crafting
+	global floor
+	global wood
+	global metal
+	global swordLevel
+	global armourLevel
 
 	coords = mainCanvas.coords(pEntity)
 
@@ -287,6 +312,32 @@ def mainPress(event):
 	elif event.char == "s" and skilling == 0 and coords[1] < 720:
 		direction = "down"
 		movy = 10
+	elif event.char == "1" and skilling == 0:
+		print("test")
+		exp = 100 * round(1.5 ** (level(hp) + 8))
+		hp = exp
+	elif event.char == "2"  and skilling == 0:
+		exp = 100 * round(1.5 ** (level(attack) + 8))
+		attack = exp
+	elif event.char == "3" and skilling == 0:
+		exp = 100 * round(1.5 ** (level(woodcutting) + 8))
+		woodcutting = exp
+	elif event.char == "4" and skilling == 0:
+		exp = 100 * round(1.5 ** (level(mining) + 8))
+		mining = exp
+	elif event.char == "5" and skilling == 0:
+		exp = 100 * round(1.5 ** (level(crafting) + 8))
+		crafting = exp
+	elif event.char == "6" and skilling == 0:
+		floors = floors + 25
+	elif event.char == "7" and skilling == 0:
+		wood = wood + 100
+	elif event.char == "8" and skilling == 0:
+		metal = metal + 100
+	elif event.char == "9" and skilling == 0:
+		swordLevel = swordLevel + 10
+	elif event.char == "0" and skilling == 0:
+		armourLevel = armourLevel + 10
 
 # -=-=-=-=- Functions for menu -=-=-=-=-  
 
@@ -378,10 +429,9 @@ def playerScreen():
 	pass
 
 def controls():
+	#[left, right, up, down, attack]
+	protectedCharacters = ["1","2","3","4,","5", "6", "7", "8", "9", "0", "Ctrl"]
 	pass
-
-def pause(): 
-	tk.messagebox.showinfo(title="Paused",message="Game is paused")
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
@@ -526,7 +576,7 @@ def playerAttack(coords):
 def gamePress(event):
 	global direction
 	global movx
-	global movy 
+	global movy
 
 	coords = gameCanvas.coords(gEntity)
 
@@ -1095,7 +1145,6 @@ def floorScreen():
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
-	menubar.add_command(label="Pause", command= pause)
 
 	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
 	gameCanvas.pack()
@@ -1112,6 +1161,7 @@ def floorScreen():
 	
 	attacking = 0
 	direction = "right"
+	cheatCombo = 0
 	movx = 0
 	movy = 0
 
@@ -1178,7 +1228,6 @@ def deathScreen():
 
 	global deathCanvas
 
-	menu.delete("Pause")
 	gameCanvas.destroy()
 	menubar.entryconfig("Player", state = "normal")
 
