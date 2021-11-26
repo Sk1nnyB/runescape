@@ -22,6 +22,7 @@
 
 # loginWindow = window of the login screen
 # mainWindow = window of the main/game screen
+# controlWindow = window of the control choice screen
 # mainCanvas = canvas of main screen
 # gameCanvas = canvas of game screen
 # deathCanvas = canvas of death screen
@@ -439,13 +440,84 @@ def leaderboard(type):
 def playerScreen():
 	pass
 
-def controls():
-	protectedCharacters = ["1","2","3","4,","5", "6", "7", "8", "9", "0"] # These characters cannot be overwritten as they are used for cheat codes
+def control(controls):
+	global controlWindow
 
 	controlWindow= tk.Tk()
-	controlWindow.geometry("300x300")
-	controlWindow.title(type + " leaderboard")
+	controlWindow.geometry("500x500")
+	controlWindow.title("Controls")
 	controlWindow.resizable(0, 0)
+
+	titleLabel =tk.Label(controlWindow, text = "-=-=- CONTROLS -=-=-")
+
+	leftInput = tk.StringVar(controlWindow, controls[0])
+	rightInput = tk.StringVar(controlWindow, controls[1])
+	upInput = tk.StringVar(controlWindow, controls[2])
+	downInput = tk.StringVar(controlWindow, controls[3])
+	attackInput = tk.StringVar(controlWindow, controls[4])
+	
+	leftLabel = tk.Label(controlWindow, text = "Move Left:")
+	leftFetch = tk.Entry(controlWindow,textvariable = leftInput)
+	rightLabel = tk.Label(controlWindow, text = "Move Right:")
+	rightFetch = tk.Entry(controlWindow,textvariable = rightInput)
+	upLabel = tk.Label(controlWindow, text = "Move Up:")
+	upFetch = tk.Entry(controlWindow,textvariable = upInput)
+	downLabel = tk.Label(controlWindow, text = "Move Down:")
+	downFetch = tk.Entry(controlWindow,textvariable = downInput)
+	attackLabel = tk.Label(controlWindow, text = "Attack:")
+	attackFetch = tk.Entry(controlWindow,textvariable = attackInput)
+
+	saveButton = tk.Button(controlWindow,text = "Save", command = lambda: controlsSave([leftInput.get(), rightInput.get(), upInput.get(), downInput.get(), attackInput.get()]))
+	  
+	titleLabel.grid(row=1,column=1, columnspan = 2)
+
+	leftLabel.grid(row=2,column=1)
+	leftFetch.grid(row=2,column=2)
+	rightLabel.grid(row=3,column=1)
+	rightFetch.grid(row=3,column=2)
+	upLabel.grid(row=4,column=1)
+	upFetch.grid(row=4,column=2)
+	downLabel.grid(row=5,column=1)
+	downFetch.grid(row=5,column=2)
+	attackLabel.grid(row=6,column=1)
+	attackFetch.grid(row=6,column=2)
+
+	saveButton.grid(row=7, column =2)
+
+	controlWindow.grid_rowconfigure(0, weight=1)
+	controlWindow.grid_rowconfigure(8, weight=1)
+	controlWindow.grid_columnconfigure(0, weight=1)
+	controlWindow.grid_columnconfigure(3, weight=1)
+
+def controlsSave(newBinds):
+	global controls
+
+	protectedCharacters = ["1","2","3","4,","5", "6", "7", "8", "9", "0"] # These characters cannot be overwritten as they are used for cheat codes
+	tempNewBinds = []
+	error = 0
+
+	for bind in newBinds:
+		if len(bind) != 1 and error == 0:
+			tk.messagebox.showerror(title="Failure",message="Ensure keybinds are single keys")
+			controlWindow.destroy()
+			control(newBinds)
+			error = 1
+		elif bind in protectedCharacters and error == 0:
+			tk.messagebox.showerror(title="Failure",message="Num keys cannot be overriden")
+			controlWindow.destroy()
+			control(newBinds)
+			error = 1
+		elif bind in tempNewBinds and error == 0:
+			tk.messagebox.showerror(title="Failure",message="Ensure keybinds are used only once")
+			controlWindow.destroy()
+			control(newBinds)
+			error = 1
+		else:
+			tempNewBinds.append(bind)
+
+	if len(tempNewBinds) == 5:
+		controls = tempNewBinds
+		save()
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
@@ -1011,6 +1083,7 @@ def mainWindow():
 	
 	global mainWindow
 	global menubar
+	global controls
 
 	mainWindow = tk.Tk()
 	mainWindow.geometry("1280x720")
@@ -1038,7 +1111,7 @@ def mainWindow():
 	menubar.add_command(label="Exit", command= mainWindow.destroy)
 	menubar.add_cascade(label="Player", menu= menuPlayer)
 	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
-	menubar.add_command(label="Controls", command=controls)
+	menubar.add_command(label="Controls", command= lambda: control(controls))
 
 	statsCollect()
 
