@@ -380,20 +380,21 @@ def leaderboard(type): # Function to display the leaderboard screen
 	leaderboard= tk.Tk() # Create the window for the leaderboard
 	leaderboard.geometry("300x300") # Size the window appropriately, small as it is a sub window
 	leaderboard.title(type + " leaderboard") # Title the window appropriate to the skill shown
-	leaderboard.resizable(0, 0) # This means the user can make it bigger if they wish
+	leaderboard.configure(bg='black') # Set the background to black so the colours contrast better
+	leaderboard.resizable(0, 0) # This means the user cannot resize
 
-	titleLabel= tk.Label(leaderboard, text = "Top 5 Accounts by EXP ("+type+"):")
+	titleLabel= tk.Label(leaderboard, text = "Top 5 Accounts ("+type+"):",bg="#000", fg="white") # Generate the title displayed on the window for the correct skill
 
-	players = []
+	players = [] # Refresh the list of the top 5 accounts
 
-	for filename in os.listdir(os.path.join(os.getcwd(), "accounts")):
+	for filename in os.listdir(os.path.join(os.getcwd(), "accounts")): # For each account on the computer
 
-		file = open(os.path.join(os.getcwd(), "accounts", filename), "r")
+		file = open(os.path.join(os.getcwd(), "accounts", filename), "r") # Open than account
 
-		for i, line in enumerate(file):
+		for i, line in enumerate(file): # For each stat line
 			if i == 0:
-				username = data(line). rstrip("\n")
-			if i == 2 and type == "HP":
+				username = data(line). rstrip("\n") # Find the username and take off the white space
+			if i == 2 and type == "HP": # Find the stat you need and save their score
 				score = int(data(line))
 			elif i == 3 and type == "Attack":
 				score = int(data(line))
@@ -405,36 +406,36 @@ def leaderboard(type): # Function to display the leaderboard screen
 				score = int(data(line))
 			elif i == 7 and type == "Floor":
 				score = int(data(line))
-			elif i > 7:
+			elif i > 7: # Stop once you have gone through all stats (saves memory)
 				break
 
-		player = [username, score]
-		if len(players) < 5:
-			players.append(player)
-		elif players[4][1] < player[4][1]:
-			players.pop(4)
-			players.append(player)
-		players = sorted(players, key=lambda x: x[1])
+		player = [username, score] # Save the player's name and score as a list
+		if len(players) < 5: # So that if there are less than 5 on the board
+			players.append(player) # They can join the list
+		elif players[0][1] < player[0][1]: # Or if they are higher than the lowest scorer
+			players.pop(0) # Remove that scorer
+			players.append(player) # And add the new player
+		players = sorted(players, key=lambda x: x[1]) # Then sort the list from low to high
 
-	while len(players) < 5:
-		players.insert(0,["N/A","N/A"])
+	while len(players) < 5: # If there are less than 5 total accounts
+		players.insert(0,["N/A","N/A"]) # Add the empty players
 
-	firstLabel = tk.Label(leaderboard, text = "1. " + players[4][0] + "      " + str(players[4][1]))
-	secondLabel = tk.Label(leaderboard, text = "2. " + players[3][0] + "      " + str(players[3][1]))
-	thirdLabel = tk.Label(leaderboard, text = "3. " + players[2][0] + "      " + str(players[2][1]))
-	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0] + "      " + str(players[1][1]))
-	fifthLabel = tk.Label(leaderboard, text = "5. " + players[0][0] + "      " + str(players[0][1]))
+	firstLabel = tk.Label(leaderboard, text = "1. " + players[4][0] + "      " + str(players[4][1]), bg="#000", fg="gold") # Then showcase the leaderboard with gold
+	secondLabel = tk.Label(leaderboard, text = "2. " + players[3][0] + "      " + str(players[3][1]), bg="#000", fg="silver") # silver
+	thirdLabel = tk.Label(leaderboard, text = "3. " + players[2][0] + "      " + str(players[2][1]), bg="#000", fg="#cc6633") # and bronze
+	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0] + "      " + str(players[1][1]),bg="#000", fg="white")
+	fifthLabel = tk.Label(leaderboard, text = "5. " + players[0][0] + "      " + str(players[0][1]), bg="#000", fg="white")
 	  
-	titleLabel.grid(row=1,column=1)
-	firstLabel.grid(row=2,column=1)
+	titleLabel.grid(row=1,column=1) # Put the title at the top of the grid
+	firstLabel.grid(row=2,column=1)  # Put each place into a grid so they are in order
 	secondLabel.grid(row=3,column=1)
 	thirdLabel.grid(row=4,column=1)
 	fourthLabel.grid(row=5,column=1)
 	fifthLabel.grid(row=6,column=1)
 
-	leaderboard.grid_rowconfigure(1, weight=1)
+	leaderboard.grid_rowconfigure(1, weight=1) # center the y of the grid in the middle
 	leaderboard.grid_rowconfigure(7, weight=1)
-	leaderboard.grid_columnconfigure(0, weight=1)
+	leaderboard.grid_columnconfigure(0, weight=1) # center the x of the grid in the middle
 	leaderboard.grid_columnconfigure(2, weight=1)
 	
 def playerScreen():
