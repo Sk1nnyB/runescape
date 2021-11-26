@@ -608,10 +608,9 @@ def quit(): # Attempts to destroy all windows
 	except:
 		pass
 
-	try:
-		bossWindow.destroy()
-	except:
-		pass
+
+def pause(): # Pauses the game
+    tk.messagebox.showinfo(title="Paused",message="Game is paused") # Displays a pop up that stops all code until it is destroyed
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
@@ -1086,6 +1085,7 @@ def mainWindow():
 	menubar.add_cascade(label="Player", menu= menuPlayer)
 	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
 	menubar.add_command(label="Save", command= save)
+	menubar.add_command(label="Pause", command= pause)
 
 	statsCollect()
 
@@ -1093,17 +1093,7 @@ def mainWindow():
 
 def bossWindow():
 	mainWindow.wm_state('iconic')
-	bossWindow= tk.Tk()
-	bossWindow.geometry("1280x720")
-	bossWindow.title("Spreadsheets")
-	bossWindow.resizable(0, 0)
-
-	while True:
-		bg_key = tk.PhotoImage(file = "bosskey.png")
-		bg = tk.Label(bossWindow, image=bg_key)
-		bg.place(x=0, y=0)
-
-		bossWindow.mainloop()
+	pause()
 
 # -=-=-=-=- Functions for making screens -=-=-=-=-
 
