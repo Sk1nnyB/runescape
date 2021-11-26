@@ -1,5 +1,7 @@
 # Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torch, tombstone, tree, stone and heart taken from https://pngimg.com/
 # Dunegeon Door png taken from https://www.pngitem.com/ and allowed for personal use, player model taken from https://www.gameart2d.com/the-knight-free-sprites.html
+# Anvil taken from https://www.cleanpng.com/
+# All images used are not subject to copyright as this is for personal use
 
 # -=-=- Resolution: 1280x720 -=-=-
 
@@ -10,6 +12,7 @@
 # mainCanvas = canvas of main screen
 # gameCanvas = canvas of game screen
 # deathCanvas = canvas of death screen
+# choicePopup = popup for crafting choice
 
 # usernameInput = username input field on login screen
 # passwordInput = password input field on login screen
@@ -20,6 +23,8 @@
 # dEntity = door entity in lobby
 # tEntity = tree entity in lobby
 # oEntity = ore entity in lobby
+# aEntity = anvil entity in lobby
+# sEntity = armour stand entity in lobby
 # aimTriangle = triangle used to aim in game
 
 # playerModel = player model
@@ -44,6 +49,7 @@
 # wood = wood of the player
 # metal = metal of the player
 # swordLevel = sword level of the player
+# armourLevel = amour level of the player
 
 # attacking = if the user is currently in attack animation
 # direction = the current facing direction of the player
@@ -62,7 +68,7 @@ import time
 # -=-=-=-=- General functions -=-=-=-=-
 
 def data(line): # Seperates the number in a file line
-	data = ""
+	data = "" 
 	trigger = 0
 	for i in range (0, len(line)):
 		if trigger == 1:
@@ -151,7 +157,8 @@ def createAccount():
 		newFile.write("Floor:0\n")
 		newFile.write("Wood:0\n")
 		newFile.write("Metal:0\n")
-		newFile.write("Sword Level:1")
+		newFile.write("Sword Level:1\n")
+		newFile.write("Armour Level:1\n")
 		newFile.close()
 		errorOutput.config(text="Account Successfully Created!")
 
@@ -164,6 +171,8 @@ def mainScreenHit(coords):
 	doorCoords = mainCanvas.bbox(dEntity)
 	treeCoords = mainCanvas.bbox(tEntity)
 	oreCoords = mainCanvas.bbox(oEntity)
+	anvilCoords = mainCanvas.bbox(aEntity)
+	standCoords = mainCanvas.bbox(sEntity)
 	
 	if doorCoords[0] < coords[0] < doorCoords[2]:
 		if doorCoords[1] < coords[1] < doorCoords[3]:
@@ -173,6 +182,15 @@ def mainScreenHit(coords):
 			if prompt=='yes':
 				save()
 				floorScreen() 
+			else:
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
 
 	if treeCoords[0] < coords[0] < treeCoords[2]:
 		if treeCoords[1] < coords[1] < treeCoords[3]:
@@ -181,6 +199,7 @@ def mainScreenHit(coords):
 			prompt= tk.messagebox.askquestion("Woodcutting","Would you like to chop wood?")
 			if prompt=="yes":
 				skillingActivity("woodcutting")
+			else:
 				if direction == "left":
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
@@ -197,6 +216,47 @@ def mainScreenHit(coords):
 			prompt= tk.messagebox.askquestion("Mining","Would you like to mine metal?")
 			if prompt=="yes":
 				skillingActivity("mining")
+			else:
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
+
+	if anvilCoords[0] < coords[0] < anvilCoords[2]:
+		if anvilCoords[1] < coords[1] < anvilCoords[3]:
+			movx = 0
+			movy = 0
+			message = "Would you like to upgrade your sword?\n"
+			message = message + "Metal Need: " + str(swordLevel) + "(" + str(metal) + ")\n"
+			message = message + "Wood Need: " + str(swordLevel) + "(" + str(wood) + ")"
+			prompt= tk.messagebox.askquestion("Crafting",message)
+			if prompt=="yes":
+				skillingActivity("sword")
+			else:
+				if direction == "left":
+					mainCanvas.move(pEntity, 50, 0)
+				elif direction == "down":
+					mainCanvas.move(pEntity, -50, -50)
+				elif direction == "up":
+					mainCanvas.move(pEntity, -50, 50)
+				else:
+					mainCanvas.move(pEntity, -50, 0)
+
+	if standCoords[0] < coords[0] < standCoords[2]:
+		if standCoords[1] < coords[1] < standCoords[3]:
+			movx = 0
+			movy = 0
+			message = "Would you like to upgrade your armour?\n"
+			message = message + "Metal Need: " + str(armourLevel) + "(" + str(metal) + ")\n"
+			message = message + "Wood Need: " + str(armourLevel) + "(" + str(wood) + ")"
+			prompt= tk.messagebox.askquestion("Crafting",message)
+			if prompt=="yes":
+				skillingActivity("armour")
+			else:
 				if direction == "left":
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
@@ -240,7 +300,9 @@ def save():
 	lines[6] = "Crafting:" + str(crafting) + "\n"
 	lines[7] = "Floor:" + str(floor) + "\n"
 	lines[8] = "Wood:" + str(wood) + "\n"
-	lines[9] = "Sword Level:" + str(metal) + "\n"
+	lines[9] = "Metal:" + str(metal) + "\n"
+	lines[10] = "Sword Level:" + str(swordLevel) + "\n"
+	lines[11] = "Armour Level:" + str(armourLevel) + "\n"
 
 	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
 	userFile.writelines(lines)
@@ -252,10 +314,7 @@ def save():
 def leaderboard(type):
 	pass
 
-def statsScreen():
-	pass
-
-def inventoryScreen():
+def playerScreen():
 	pass
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
@@ -408,7 +467,7 @@ def gamePress(event):
 	elif event.char == "u" and attacking == 0:
 		playerAttack(coords)
 
-# -=-=-=-=- Functions for player -=-=-=-=-   
+# -=-=-=-=- Functions for skilling -=-=-=-=-   
 
 def statsCollect():
 
@@ -421,6 +480,7 @@ def statsCollect():
 	global wood
 	global metal
 	global swordLevel
+	global armourLevel
 	
 	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
 
@@ -443,7 +503,9 @@ def statsCollect():
 			metal = int(data(line))
 		elif i == 10:
 			swordLevel = int(data(line))
-		elif i > 10:
+		elif i == 11:
+			armourLevel = int(data(line))
+		elif i > 11:
 			break
 
 	userFile.close()  
@@ -455,6 +517,7 @@ def skillingActivity(skill):
 	global crafting
 	global wood
 	global metal
+	global armourLevel
 	global swordLevel
 
 	global skilling
@@ -491,7 +554,7 @@ def skillingActivity(skill):
 			if i == 4:
 				skilling = 0
 				movx = 0
-				movy = 0 # would auto save here but I need to prove the user can save so :/
+				movy = 0 # would auto save here but I need to prove the user can save 
 				if direction == "left":
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
@@ -507,7 +570,8 @@ def skillingActivity(skill):
 				newLevel = level(woodcutting)
 				expLeft = (100 * (1.5 ** (newLevel - 1))) - woodcutting
 
-				message = "You have cut "+ str(newWood) + " wood!\nYou have earnt " + str(exp) + " exp!\n"
+				message = "You have cut "+ str(newWood) + " wood!("+str(wood)+")!\n"
+				message = message + "You have earnt " + str(exp) + " exp!\n"
 				message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
 
 				finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
@@ -542,7 +606,7 @@ def skillingActivity(skill):
 			if i == 4:
 				skilling = 0
 				movx = 0
-				movy = 0 # would auto save here but I need to prove the user can save so :/
+				movy = 0 
 				if direction == "left":
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
@@ -558,13 +622,147 @@ def skillingActivity(skill):
 				newLevel = level(mining)
 				expLeft = (100 * (1.5 ** (newLevel - 1))) - mining
 
-				message = "You have mined "+ str(newOre) + " metal!\nYou have earnt " + str(exp) + " exp!\n"
+				message = "You have mined "+ str(newOre) + " metal("+str(metal)+")!\n"
+				message = message + "You have earnt " + str(exp) + " exp!\n"
 				message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
 
 				finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
 
 		loadingPopup.mainloop()
-				
+
+	if skill == "sword":		
+			
+		delay = random.randint(2, 4)
+
+		exp =  10 * level(crafting)
+
+		if metal >= swordLevel and wood >= swordLevel:
+			loadingPopup = tk.Tk()
+			loadingPopup.title("Crafting")
+			loadingPopup.geometry("150x100")
+		
+			loadingBar = Progressbar(loadingPopup, orient = HORIZONTAL, length = 100, mode = "determinate")
+
+			loadingBar.place(x=25, y=20)
+
+			skillLabel = tk.Label(loadingPopup, text = "Crafting...")
+			skillLabel.place(x=25 ,y=40)
+		
+			for i in range(5):
+				loadingPopup.update_idletasks()
+				loadingBar['value'] += 20
+				time.sleep(delay/5)
+				if i == 4:
+					crafting = crafting + exp
+					metal = metal - swordLevel
+					wood = wood - swordLevel
+					swordLevel = swordLevel + 1
+					skilling = 0
+					movx = 0
+					movy = 0 
+					if direction == "left":
+						mainCanvas.move(pEntity, 50, 0)
+					elif direction == "down":
+						mainCanvas.move(pEntity, -50, -50)
+					elif direction == "up":
+						mainCanvas.move(pEntity, -50, 50)
+					else:
+						mainCanvas.move(pEntity, -50, 0)
+					mainMove()
+					
+					loadingPopup.destroy()
+
+					newLevel = level(crafting)
+					expLeft = (100 * (1.5 ** (newLevel - 1))) - crafting
+
+					message = "New sword level:"+str(swordLevel)+"\n"
+					message = message + "You have earnt " + str(exp) + " exp!\n"
+					message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
+
+					finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
+
+			loadingPopup.mainloop()
+
+		else:
+			tk.messagebox.showinfo(title="Crafting", message="Not enough resources")
+			skilling = 0
+			movx = 0
+			movy = 0 
+			if direction == "left":
+				mainCanvas.move(pEntity, 50, 0)
+			elif direction == "down":
+				mainCanvas.move(pEntity, -50, -50)
+			elif direction == "up":
+				mainCanvas.move(pEntity, -50, 50)
+			else:
+				mainCanvas.move(pEntity, -50, 0)
+
+	if skill == "armour":
+		delay = random.randint(2, 4)
+
+		exp =  10 * level(crafting)
+
+		if metal >= armourLevel and wood >= armourLevel:
+			loadingPopup = tk.Tk()
+			loadingPopup.title("Crafting")
+			loadingPopup.geometry("150x100")
+		
+			loadingBar = Progressbar(loadingPopup, orient = HORIZONTAL, length = 100, mode = "determinate")
+
+			loadingBar.place(x=25, y=20)
+
+			skillLabel = tk.Label(loadingPopup, text = "Crafting...")
+			skillLabel.place(x=25 ,y=40)
+		
+			for i in range(5):
+				loadingPopup.update_idletasks()
+				loadingBar['value'] += 20
+				time.sleep(delay/5)
+				if i == 4:
+					crafting = crafting + exp
+					metal = metal - armourLevel
+					wood = wood - armourLevel
+					armourLevel = armourLevel + 1
+					skilling = 0
+					movx = 0
+					movy = 0 
+					if direction == "left":
+						mainCanvas.move(pEntity, 50, 0)
+					elif direction == "down":
+						mainCanvas.move(pEntity, -50, -50)
+					elif direction == "up":
+						mainCanvas.move(pEntity, -50, 50)
+					else:
+						mainCanvas.move(pEntity, -50, 0)
+					mainMove()
+					
+					loadingPopup.destroy()
+
+					newLevel = level(crafting)
+					expLeft = (100 * (1.5 ** (newLevel - 1))) - crafting
+
+					message = "New armour level:"+str(armourLevel)+"\n"
+					message = message + "You have earnt " + str(exp) + " exp!\n"
+					message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!"
+
+					finishPopup = tk.messagebox.showinfo(title="Completed", message= message)
+
+			loadingPopup.mainloop()
+
+		else:
+			tk.messagebox.showinfo(title="Crafting", message="Not enough resources")
+			skilling = 0
+			movx = 0
+			movy = 0 
+			if direction == "left":
+				mainCanvas.move(pEntity, 50, 0)
+			elif direction == "down":
+				mainCanvas.move(pEntity, -50, -50)
+			elif direction == "up":
+				mainCanvas.move(pEntity, -50, 50)
+			else:
+				mainCanvas.move(pEntity, -50, 0)
+
 # -=-=-=-=- Functions for movement -=-=-=-=-  
 
 def keyRelease(event):
@@ -669,8 +867,7 @@ def mainWindow():
 	menuPlayer = tk.Menu(menubar, tearoff = 0)
 	menuPlayer.add_command(label="Save", command= save)
 	menuPlayer.add_separator()
-	menuPlayer.add_command(label="Stats", command= statsScreen)
-	menuPlayer.add_command(label="Inventory", command= inventoryScreen)
+	menuPlayer.add_command(label="Stats", command= playerScreen)
 
 	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
 	menuLeaderboard.add_command(label="Floors", command= leaderboard("floor"))
@@ -697,8 +894,8 @@ def mainScreen():
 	global playerModel
 	global heartModel
 
-	global attackFrame1
-	global attackFrame2
+	global attackFrame1 # I found the code worked best when images were fetched in the same function
+	global attackFrame2 # that the canvas was made so here each image is fetched
 	global attackFrame3
 	global attackFrame4
 	global attackFrame5
@@ -719,6 +916,8 @@ def mainScreen():
 	global dEntity
 	global tEntity
 	global oEntity 
+	global aEntity
+	global sEntity
 
 	global movx
 	global movy
@@ -736,6 +935,10 @@ def mainScreen():
 	treeModel = treeModel.subsample(2)
 	oreModel = tk.PhotoImage(file="ore.png")
 	oreModel = oreModel.subsample(10)
+	anvilModel = tk.PhotoImage(file="anvil.png")
+	anvilModel = anvilModel.subsample(5)
+	standModel = tk.PhotoImage(file="armour.png")
+	standModel = standModel.subsample(5)
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
 
@@ -776,7 +979,8 @@ def mainScreen():
 	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
 	tEntity = mainCanvas.create_image(1200, 360, image = treeModel)
 	oEntity = mainCanvas.create_image(80, 390, image = oreModel)
-	
+	aEntity = mainCanvas.create_image(780, 660, image = anvilModel)
+	sEntity = mainCanvas.create_image(500, 640, image = standModel)
 	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
 
 	mainCanvas.bind("<KeyPress>", mainPress)
@@ -815,7 +1019,7 @@ def floorScreen():
 	gameCanvas.pack()
 	gameCanvas.focus_set()
 
-	health = level(hp) * 10
+	health = level(hp) * 5 * armourLevel
 
 	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1))
 	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health)
