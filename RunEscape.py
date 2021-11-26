@@ -94,9 +94,6 @@ def endAccept(event): # Moves player back to lobby
 		victoryCanvas.destroy()
 	mainScreen()
 
-def pause(): # Pauses the game
-	tk.messagebox.showinfo(title="Paused",message="Game is paused")
-
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
 def login():
@@ -144,6 +141,8 @@ def createAccount():
 	
 	if user == "" or user.isspace():
 		errorOutput.config(text="Username cannot be empty")
+	elif len(user) > 10:
+		errorOutput.config(text="Username longer than 10 characters")
 	elif password == "" or password.isspace():
 		errorOutput.config(text="Password cannot be empty")
 	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")):
@@ -315,10 +314,74 @@ def save():
 	tk.messagebox.showinfo("Save confirmed","Save has been confirmed")
 
 def leaderboard(type):
-	pass
+	leaderboard= tk.Tk()
+	leaderboard.geometry("300x300")
+	leaderboard.title(type + " leaderboard")
+	leaderboard.resizable(0, 0)
 
+	titleLabel= tk.Label(leaderboard, text = "Top 5 Accounts by EXP ("+type+"):")
+
+	players = []
+
+	for filename in os.listdir(os.path.join(os.getcwd(), "accounts")):
+
+		file = open(os.path.join(os.getcwd(), "accounts", filename), "r")
+
+		for i, line in enumerate(file):
+			if i == 0:
+				username = data(line)
+			if i == 2 and type == "HP":
+				score = int(data(line))
+			elif i == 3 and type == "Attack":
+				score = int(data(line))
+			elif i == 4 and type == "Woodcutting":
+				score = int(data(line))
+			elif i == 5 and type == "Mining":
+				score = int(data(line))
+			elif i == 6 and type == "Crafting":
+				score = int(data(line))
+			elif i == 7 and type == "Floor":
+				score = int(data(line))
+			elif i > 7:
+				break
+
+		player = [username, score]
+		if len(players) < 5:
+			players.append(player)
+		elif players[4][1] < player[4][1]:
+			players.pop(4)
+			players.append(player)
+		players = sorted(players, key=lambda x: x[1])
+
+	while len(players) < 5:
+		players.insert(0,["N/A","N/A"])
+
+	firstLabel = tk.Label(leaderboard, text = "1. " + players[4][0]. rstrip("\n")+ "      " + str(players[4][1]))
+	secondLabel = tk.Label(leaderboard, text = "2. " + players[3][0]. rstrip("\n")+ "      " + str(players[3][1]))
+	thirdLabel = tk.Label(leaderboard, text = "3. " + players[2][0]. rstrip("\n")+ "      " + str(players[2][1]))
+	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0]. rstrip("\n")+ "      " + str(players[1][1]))
+	fifthLabel = tk.Label(leaderboard, text = "5. " + players[0][0]. rstrip("\n") + "      " + str(players[0][1]))
+	  
+	titleLabel.grid(row=1,column=1)
+	firstLabel.grid(row=2,column=1)
+	secondLabel.grid(row=3,column=1)
+	thirdLabel.grid(row=4,column=1)
+	fourthLabel.grid(row=5,column=1)
+	fifthLabel.grid(row=6,column=1)
+
+	leaderboard.grid_rowconfigure(1, weight=1)
+	leaderboard.grid_rowconfigure(7, weight=1)
+	leaderboard.grid_columnconfigure(0, weight=1)
+	leaderboard.grid_columnconfigure(2, weight=1)
+	
 def playerScreen():
 	pass
+
+def controls():
+	pass
+
+def pause(): 
+	tk.messagebox.showinfo(title="Paused",message="Game is paused")
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
@@ -885,16 +948,19 @@ def mainWindow():
 	menuPlayer.add_command(label="Stats", command= playerScreen)
 
 	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
-	menuLeaderboard.add_command(label="Floors", command= leaderboard("floor"))
-	
+	menuLeaderboard.add_command(label="Floors", command= lambda: leaderboard("Floors"))
 	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
-	menuLevels.add_command(label="HP", command= leaderboard("hp"))
-	menuLevels.add_command(label="Attack", command = leaderboard("attack"))
+	menuLevels.add_command(label="HP", command= lambda: leaderboard("HP"))
+	menuLevels.add_command(label="Attack", command= lambda: leaderboard("Attack"))
+	menuLevels.add_command(label="Woodcutting", command= lambda: leaderboard("Woodcutting"))
+	menuLevels.add_command(label="Mining", command= lambda: leaderboard("Mining"))
+	menuLevels.add_command(label="Crafting", command= lambda: leaderboard("Crafting"))
 	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
 
 	menubar.add_command(label="Exit", command= mainWindow.destroy)
 	menubar.add_cascade(label="Player", menu= menuPlayer)
 	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
+	menubar.add_command(label="Controls", command=controls)
 
 	statsCollect()
 
@@ -1132,6 +1198,7 @@ def victoryScreen():
 	global hp
 
 	gameCanvas.destroy()
+	menubar.entryconfig("Player", state = "normal")
 	menubar.entryconfig("Player", state = "normal")
 
 	floor = floor + 1
