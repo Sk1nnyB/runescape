@@ -94,6 +94,9 @@ def endAccept(event): # Moves player back to lobby
 		victoryCanvas.destroy()
 	mainScreen()
 
+def pause(): # Pauses the game
+	tk.messagebox.showinfo(title="Paused",message="Game is paused")
+
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
 def login():
@@ -1026,6 +1029,7 @@ def floorScreen():
 
 	mainCanvas.destroy()
 	menubar.entryconfig("Player", state = "disabled")
+	menubar.add_command(label="Pause", command= pause)
 
 	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
 	gameCanvas.pack()
@@ -1108,6 +1112,7 @@ def deathScreen():
 
 	global deathCanvas
 
+	menu.delete("Pause")
 	gameCanvas.destroy()
 	menubar.entryconfig("Player", state = "normal")
 
