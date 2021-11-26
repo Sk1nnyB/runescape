@@ -381,6 +381,9 @@ def save(): # This is the function to save the stats of the player, their curren
 	tk.messagebox.showinfo("Save confirmed","Save has been confirmed") # Inform the user that their save has been successful
 
 def leaderboard(type): # Function to display the leaderboard screen
+
+	global leaderboard # Allows it to be destroyed by exit
+
 	save() # Save the user's progress, so that all the most up to date stats are shown
 	leaderboard= tk.Tk() # Create the window for the leaderboard
 	leaderboard.geometry("300x300") # Size the window appropriately, small as it is a sub window
@@ -443,8 +446,58 @@ def leaderboard(type): # Function to display the leaderboard screen
 	leaderboard.grid_columnconfigure(0, weight=1) # center the x of the grid in the middle
 	leaderboard.grid_columnconfigure(2, weight=1)
 	
-def playerScreen():
-	pass
+def playerScreen(): # Function to display the player's stats
+
+	global playerWindow # Allows it to be destroyed by exit 
+
+	playerWindow= tk.Tk() # Create the window for the player
+	playerWindow.geometry("450x150") # Size the window appropriately, small as it is a sub window
+	playerWindow.title("Player Stats") # Title the window to show it is player stats
+	playerWindow.configure(bg='#7c3f00') # Set the background to brown to resemble a backpack
+	playerWindow.resizable(0, 0) # This means the user cannot resize the window
+
+	#modelLabel = tk.Label(playerWindow, image = model) # Get the player model as a label
+	#modelLabel.image = model
+	userLabel = tk.Label(playerWindow, text = "Username:" +  "      " + user, bg="#562b00", fg="white") # Make it appear as though they are pack of the "backpack"
+
+	skillLabel = tk.Label(playerWindow, text = "-=- LOBBY SKILLS -=-", bg="#562b00", fg="white") # Lobby Skills
+	wcLabel = tk.Label(playerWindow, text = "Woodcutting:" +  "      " + str(level(woodcutting)), bg="#562b00", fg="white")
+	miningLabel = tk.Label(playerWindow, text = "Mining:" +  "      " + str(level(mining)), bg="#562b00", fg="white")
+	craftLabel = tk.Label(playerWindow, text = "Crafting:" +  "      " + str(level(crafting)), bg="#562b00", fg="white")
+	
+	dungeonLabel = tk.Label(playerWindow, text = "-=- DUNGEON SKILLS -=-", bg="#562b00", fg="white") # Dungeoneering Skills
+	hpLabel = tk.Label(playerWindow, text = "HP:" +  "      " + str(level(hp)), bg="#562b00", fg="white") 
+	attackLabel = tk.Label(playerWindow, text = "Attack:" +  "      " + str(level(attack)), bg="#562b00", fg="white") 
+	floorLabel = tk.Label(playerWindow, text = "Floor:" +  "      " + str(floor), bg="#562b00", fg="white") 
+
+	resLabel = tk.Label(playerWindow, text =  "-=- RESOURCES -=-", bg="#562b00", fg="white") # Resources
+	woodLabel = tk.Label(playerWindow, text = "Wood:" +  "      " + str(wood), bg="#562b00", fg="white") 
+	metalLabel = tk.Label(playerWindow, text = "Metal:" +  "      " + str(metal), bg="#562b00", fg="white") 
+
+	eqmntLabel = tk.Label(playerWindow, text = "-=- EQUIPMENT LVL -=-", bg="#562b00", fg="white") # Equipment
+	swordLabel = tk.Label(playerWindow, text = "Sword:" +  "      " + str(swordLevel), bg="#562b00", fg="white") 
+	armourLabel = tk.Label(playerWindow, text = "Armour:" +  "      " + str(armourLevel), bg="#562b00", fg="white") 
+
+	#modelLabel.grid(row=0,column=0, rowspan = 4) # Place the player model on the right, in line with the two major stat sections
+	userLabel.grid(row=4,column=0) # Put the username beneath  
+
+	skillLabel.grid(row = 0, column= 1) # Place the lobby skills on the right of the user model
+	wcLabel.grid(row = 1, column= 1)
+	miningLabel.grid(row = 2, column= 1)  
+	craftLabel.grid(row = 3, column= 1) 
+
+	dungeonLabel.grid(row = 0, column= 2) # Place the dungeon skills on the right of the user model
+	hpLabel.grid(row = 1, column= 2)
+	attackLabel.grid(row = 2, column= 2) 
+	floorLabel.grid(row = 3, column= 2) 
+
+	resLabel.grid(row = 4, column= 1) # Place the materials beneath the lobby skills
+	woodLabel.grid(row = 5, column= 1)
+	metalLabel.grid(row = 6, column= 1)
+
+	eqmntLabel.grid(row = 4, column= 2) # Place the equipment beneath the dungeon skills
+	swordLabel.grid(row = 5, column= 2)
+	armourLabel.grid(row = 6, column= 2)
 
 def control(controls): # Shows the screen of changeable controls, taking in the current controls (or control attempt in cases of failure)
 	global controlWindow # Make the control window available to controlsSave()
@@ -526,6 +579,30 @@ def controlsSave(newBinds): # Attempts to see if the new controls are savable
 	if len(tempNewBinds) == 5: # If there are 5 accepted binds
 		controls = tempNewBinds # Set them as the new controls
 		save() # And save the new controls
+
+def quit(): # Attempts to destroy all windows
+	
+	mainWindow.destroy() # Destroys the main one which will always be open 
+	
+	try: # Then looks through the sub windows
+		leaderboard.destroy() # And destroys them one by one
+	except:
+		pass
+	
+	try:
+		controlWindow.destroy()
+	except:
+		pass
+
+	try:
+		playerWindow.destroy()
+	except:
+		pass
+
+	try:
+		loadingPopup.destroy()
+	except:
+		pass
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
@@ -746,6 +823,8 @@ def skillingActivity(activity): # Allows the user to skill at an entity
 	global movx # Get the current x and y velocities of the player
 	global movy
 
+	global loadingPopup # Allows it to be destroyed by exit
+
 	skilling = 1 # Set the skilling status of the player to true
 
 	if activity == "Woodcutting": # Depending on the skill choosen
@@ -869,43 +948,43 @@ def skillingActivity(activity): # Allows the user to skill at an entity
 
 # -=-=-=-=- Functions for movement -=-=-=-=-  
 
-def keyRelease(event):
-	global movx
+def keyRelease(event): # Function for when a key is released
+	global movx # Take the velocities of x and y
 	global movy
 
-	movx = 0
+	movx = 0 # And reset them
 	movy = 0 
 
-def mainMove():
-	coords = mainCanvas.coords(pEntity)
-	mainScreenHit(coords)
-	mainCanvas.move(pEntity, movx, movy)
-	mainCanvas.after(30, mainMove) 
+def mainMove(): # Function for movement on the main screen
+	coords = mainCanvas.coords(pEntity) # Take the current co ordindates of the player
+	mainScreenHit(coords)# Ensure it is not already hitting anything
+	mainCanvas.move(pEntity, movx, movy) # Then move it in that direction
+	mainCanvas.after(30, mainMove) # Wait 30ms then do it again 
 
-def gameMove():
+def gameMove(): # Function for movement on the game screen
 
-	global aimTriangle
+	global aimTriangle # Access the aiming triangle
 
-	gameCanvas.move(gEntity, movx, movy)
-	pCoords = gameCanvas.coords(gEntity)
+	gameCanvas.move(gEntity, movx, movy) 
+	pCoords = gameCanvas.coords(gEntity) # Take the current co ordindates of the player
 
-	if direction == "left":
-		coords = [pCoords[0] - 70, pCoords[1], pCoords[0] - 50, pCoords[1] - 20, pCoords[0] - 50, pCoords[1] + 20]
-	elif direction == "down":
+	if direction == "left": # If they are moving left
+		coords = [pCoords[0] - 70, pCoords[1], pCoords[0] - 50, pCoords[1] - 20, pCoords[0] - 50, pCoords[1] + 20] # Get the triangle co ordinates their left
+	elif direction == "down": # Repeat for each direction
 		coords = [pCoords[0], pCoords[1] + 90, pCoords[0] - 20, pCoords[1] + 70, pCoords[0] + 20, pCoords[1] + 70]
 	elif direction == "up":
 		coords = [pCoords[0], pCoords[1] - 90, pCoords[0] - 20, pCoords[1] - 70, pCoords[0] + 20, pCoords[1] - 70]
 	else:
 		coords = [pCoords[0] + 70, pCoords[1], pCoords[0] + 50, pCoords[1] - 20, pCoords[0] + 50, pCoords[1] + 20]
 	
-	try:
-		gameCanvas.delete(aimTriangle)
-	except:
-		pass
+	try: # Try if the triangle exists
+		gameCanvas.delete(aimTriangle) # Delete the current traingle
+	except: # If there is not a triangle
+		pass # Do nothing
 
-	aimTriangle = gameCanvas.create_polygon(coords, fill="red",outline="black")
+	aimTriangle = gameCanvas.create_polygon(coords, fill="red",outline="black") # Create the triangle in the desired position
 
-	gameCanvas.after(10, gameMove) 
+	gameCanvas.after(10, gameMove) # Wait 10ms then do it again, more responsive as it is needed for gaming and the triangle must be updated frequently
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -984,7 +1063,7 @@ def mainWindow():
 	menuLevels.add_command(label="Crafting", command= lambda: leaderboard("Crafting"))
 	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
 
-	menubar.add_command(label="Exit", command= mainWindow.destroy)
+	menubar.add_command(label="Exit", command= quit)
 	menubar.add_cascade(label="Player", menu= menuPlayer)
 	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
 	menubar.add_command(label="Controls", command= lambda: control(controls))
@@ -1245,5 +1324,5 @@ def victoryScreen():
 	time.sleep(0.4)
 	victoryCanvas.bind("<Key>", endAccept)
 	
-loginWindow()
-mainWindow()
+loginWindow() # Start off the login window
+mainWindow() # Then move to the game window
