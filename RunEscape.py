@@ -64,7 +64,7 @@
 # metal = metal of the player
 # swordLevel = sword level of the player
 # armourLevel = amour level of the player
-# controls = the corresponding keys are: [left, right, up, down, attack]
+# controls = the corresponding keys are: [left, right, up, down, attack, boss]
 
 # attacking = if the user is currently in attack animation
 # direction = the current facing direction of the player
@@ -142,6 +142,7 @@ def login(): # Function to log the user in
 		else: # Otherwise they got everything right
 			errorOutput.config(text="Welcome Adventurer!") # Display the welcome message
 			loginWindow.destroy() # Close the log in window, it is done this way to emulate a real RPG launcher
+			mainWindow() # Then move to the game window
 	else: # Otherwise the file doesn't exist
 		errorOutput.config(text="Username does not exist") # Inform them there is no account
 
@@ -182,6 +183,7 @@ def createAccount(): # Function to create a new user account
 		newFile.write("Up:w\n")
 		newFile.write("Down:s\n")
 		newFile.write("Attack:u\n")
+		newFile.write("Boss:m\n")
 		newFile.close() # Close the file once you are done
 		errorOutput.config(text="Account Successfully Created!") # Inform the user their account has been made
 
@@ -320,6 +322,8 @@ def mainPress(event): # Determines the outcome of the user pressing a key on the
 	elif event.char == controls[3] and skilling == 0 and coords[1] < 710:
 		direction = "down"
 		movy = 10
+	elif event.char == controls[5]:
+		bossWindow()
 	elif event.char == "1" and skilling == 0: # If the player is not skilling
 		exp = 100 * round(1.5 ** (level(hp) + 8)) # Activate the according cheat code
 		hp = exp # Update their stat
@@ -418,9 +422,11 @@ def leaderboard(type): # Function to display the leaderboard screen
 				break
 
 		player = [username, score] # Save the player's name and score as a list
+		print(player)
+		print
 		if len(players) < 5: # So that if there are less than 5 on the board
 			players.append(player) # They can join the list
-		elif players[0][1] < player[0][1]: # Or if they are higher than the lowest scorer
+		elif int(players[0][1]) < int(player[1]): # Or if they are higher than the lowest scorer
 			players.pop(0) # Remove that scorer
 			players.append(player) # And add the new player
 		players = sorted(players, key=lambda x: x[1]) # Then sort the list from low to high
@@ -507,6 +513,7 @@ def control(controls): # Shows the screen of changeable controls, taking in the 
 	upInput = tk.StringVar(controlWindow, controls[2])
 	downInput = tk.StringVar(controlWindow, controls[3])
 	attackInput = tk.StringVar(controlWindow, controls[4])
+	bossInput = tk.StringVar(controlWindow, controls[5])
 	
 	leftLabel = tk.Label(controlWindow, text = "Move Left:") # Create input text labels to show each controls input field that caputures the input variable
 	leftFetch = tk.Entry(controlWindow,textvariable = leftInput)
@@ -518,9 +525,11 @@ def control(controls): # Shows the screen of changeable controls, taking in the 
 	downFetch = tk.Entry(controlWindow,textvariable = downInput)
 	attackLabel = tk.Label(controlWindow, text = "Attack:")
 	attackFetch = tk.Entry(controlWindow,textvariable = attackInput)
+	bossLabel = tk.Label(controlWindow, text = "Boss Key:")
+	bossFetch = tk.Entry(controlWindow,textvariable = attackInput)
 
 	# Button that runs the function to save the new controls
-	saveButton = tk.Button(controlWindow,text = "Save", command = lambda: controlsSave([leftInput.get(), rightInput.get(), upInput.get(), downInput.get(), attackInput.get()])) 
+	saveButton = tk.Button(controlWindow,text = "Save", command = lambda: controlsSave([leftInput.get(), rightInput.get(), upInput.get(), downInput.get(), attackInput.get(), bossInput.get()])) 
 	
 	# Put the title at the top of the grid, centered accross both 
 	titleLabel.grid(row=1,column=1, columnspan = 2)
@@ -535,11 +544,13 @@ def control(controls): # Shows the screen of changeable controls, taking in the 
 	downFetch.grid(row=5,column=2)
 	attackLabel.grid(row=6,column=1)
 	attackFetch.grid(row=6,column=2)
+	bossLabel.grid(row=7,column=1)
+	bossFetch.grid(row=7,column=2)
 
-	saveButton.grid(row=7, column =2) # Finally put the button at the bottom
+	saveButton.grid(row=8, column =2) # Finally put the button at the bottom
 
 	controlWindow.grid_rowconfigure(0, weight=1) # Finally center the x and y of the grid
-	controlWindow.grid_rowconfigure(8, weight=1)
+	controlWindow.grid_rowconfigure(9, weight=1)
 	controlWindow.grid_columnconfigure(0, weight=1)
 	controlWindow.grid_columnconfigure(3, weight=1)
 
@@ -569,7 +580,7 @@ def controlsSave(newBinds): # Attempts to see if the new controls are savable
 		else: # Add it to the list of accepted binds
 			tempNewBinds.append(bind)
 
-	if len(tempNewBinds) == 5: # If there are 5 accepted binds
+	if len(tempNewBinds) == len(controls): # If there are enough accepted binds
 		controls = tempNewBinds # Set them as the new controls
 		save() # And save the new controls
 
@@ -594,6 +605,11 @@ def quit(): # Attempts to destroy all windows
 
 	try:
 		loadingPopup.destroy()
+	except:
+		pass
+
+	try:
+		bossWindow.destroy()
 	except:
 		pass
 
@@ -745,6 +761,8 @@ def gamePress(event): # Function for when the user presses a button on the game 
 	elif event.char == controls[4] and attacking == 0: # If the player has pressed the attack key and is not already attacking
 	# The attack check isredundant as this is also checked in the attack function but if changes are made in that function it will not affect this one
 		playerAttack(coords) # Begin the attack animation for the player, with their current co ordinates as the center of the attack 
+	elif event.char == controls[5]:
+		bossWindow()
 
 # -=-=-=-=- Functions for skilling -=-=-=-=-   
 
@@ -797,7 +815,9 @@ def statsCollect(): # Collect the stats for the player and store in global varia
 			controls.append(data(line). rstrip("\n"))
 		elif i == 16:
 			controls.append(data(line). rstrip("\n"))
-		elif i > 16: # When all stats have been read
+		elif i == 17:
+			controls.append(data(line). rstrip("\n"))
+		elif i > 17: # When all stats have been read
 			break  # Stop the program (will save memory)
 
 	userFile.close() # Stop reading from the file once all stats have been obtained   
@@ -951,14 +971,19 @@ def keyRelease(event): # Function for when a key is released
 def mainMove(): # Function for movement on the main screen
 	coords = mainCanvas.coords(pEntity) # Take the current co ordindates of the player
 	mainScreenHit(coords)# Ensure it is not already hitting anything
-	mainCanvas.move(pEntity, movx, movy) # Then move it in that direction
+	try: # In case it tries to move in between canvas deletion and creation at the end of a floor
+		mainCanvas.move(pEntity, movx, movy) # Then move it in that direction
+	except:
+		pass
 	mainCanvas.after(30, mainMove) # Wait 30ms then do it again 
 
 def gameMove(): # Function for movement on the game screen
 
 	global aimTriangle # Access the aiming triangle
-
-	gameCanvas.move(gEntity, movx, movy) 
+	try: # In case it tries to move after canvas deletion at the end of the game
+		gameCanvas.move(gEntity, movx, movy) # Move the player
+	except:
+		pass 
 	pCoords = gameCanvas.coords(gEntity) # Take the current co ordindates of the player
 
 	if direction == "left": # If they are moving left
@@ -977,7 +1002,7 @@ def gameMove(): # Function for movement on the game screen
 
 	aimTriangle = gameCanvas.create_polygon(coords, fill="red",outline="black") # Create the triangle in the desired position
 
-	gameCanvas.after(10, gameMove) # Wait 10ms then do it again, more responsive as it is needed for gaming and the triangle must be updated frequently
+	gameCanvas.after(30, gameMove) # Wait 10ms then do it again, more responsive as it is needed for gaming and the triangle must be updated frequently
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -1042,12 +1067,13 @@ def mainWindow():
 	mainWindow.config(menu=menubar)
 
 	menuPlayer = tk.Menu(menubar, tearoff = 0)
-	menuPlayer.add_command(label="Save", command= save)
-	menuPlayer.add_separator()
+	
+	menuPlayer.add_command(label="Controls", command= lambda: control(controls))
 	menuPlayer.add_command(label="Stats", command= playerScreen)
 
 	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
 	menuLeaderboard.add_command(label="Floors", command= lambda: leaderboard("Floors"))
+	menuLeaderboard.add_separator()
 	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
 	menuLevels.add_command(label="HP", command= lambda: leaderboard("HP"))
 	menuLevels.add_command(label="Attack", command= lambda: leaderboard("Attack"))
@@ -1059,11 +1085,25 @@ def mainWindow():
 	menubar.add_command(label="Exit", command= quit)
 	menubar.add_cascade(label="Player", menu= menuPlayer)
 	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
-	menubar.add_command(label="Controls", command= lambda: control(controls))
+	menubar.add_command(label="Save", command= save)
 
 	statsCollect()
 
 	mainScreen() 
+
+def bossWindow():
+	mainWindow.wm_state('iconic')
+	bossWindow= tk.Tk()
+	bossWindow.geometry("1280x720")
+	bossWindow.title("Spreadsheets")
+	bossWindow.resizable(0, 0)
+
+	while True:
+		bg_key = tk.PhotoImage(file = "bosskey.png")
+		bg = tk.Label(bossWindow, image=bg_key)
+		bg.place(x=0, y=0)
+
+		bossWindow.mainloop()
 
 # -=-=-=-=- Functions for making screens -=-=-=-=-
 
@@ -1193,7 +1233,7 @@ def floorScreen():
 	global floorExp
 
 	mainCanvas.destroy()
-	menubar.entryconfig("Player", state = "disabled")
+	menubar.entryconfig("Save", state = "disabled")
 
 	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
 	gameCanvas.pack()
@@ -1318,4 +1358,3 @@ def victoryScreen():
 	victoryCanvas.bind("<Key>", endAccept)
 	
 loginWindow() # Start off the login window
-mainWindow() # Then move to the game window

@@ -1,6 +1,6 @@
-Username:test
+Username:test3
 Password:test
-HP:0
+HP:30
 Attack:0
 Woodcutting:0
 Mining:0
