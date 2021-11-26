@@ -2,14 +2,14 @@ Username:test
 Password:test
 HP:0
 Attack:0
-Woodcutting:0
-Mining:0
-Crafting:0
+Woodcutting:20
+Mining:10
+Crafting:10
 Floor:0
 Wood:0
-Metal:0
+Metal:-1
 Sword Level:1
-Armour Level:1
+Armour Level:2
 Left:a
 Right:d
 Up:w

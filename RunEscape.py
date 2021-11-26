@@ -921,7 +921,7 @@ def skillingActivity(activity): # Allows the user to skill at an entity
 			message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!" # Tell the user their level and exp left
 		elif activity == "Crafting": # If they were crafting
 			equipment = equipment + 1 # Update the level of the weapon
-			message = "New " + equipmentT + " level:"+str(swordLevel)+"\n" # Tell them the new level of the weapon
+			message = "New " + equipmentT + " level:"+str(equipment)+"\n" # Tell them the new level of the weapon
 			message = message + "You have earnt " + str(exp) + " exp!\n" # Tell the user how much exp they earnt
 			message = message + "You are now level " + str(newLevel) + " with " + str(expLeft) + " exp left until your next!" # Tell the user their level and exp left
 
@@ -934,16 +934,16 @@ def skillingActivity(activity): # Allows the user to skill at an entity
 			metal = material # And the correct material
 
 		elif equipmentT == "sword": # If they were upgrading their sword
+			wood = wood - swordLevel # Take away the correct resources 
+			metal = metal - swordLevel 
 			crafting = skill # Update crafting stat
 			swordLevel = equipment # And the correct equipment
 
 		elif equipmentT == "armour": # If they were upgrading their armour
+			wood = wood - armourLevel # Take away the correct resources 
+			metal = metal - armourLevel 
 			crafting = skill # Update crafting stat
 			armourLevel = equipment # And the correct equipment
-
-		if activity == "Crafting":
-			wood = wood - equipment
-			metal = metal - equipment 
 
 		finishPopup = tk.messagebox.showinfo(title="Completed", message= message) # Then show them the message with their gain message
 
