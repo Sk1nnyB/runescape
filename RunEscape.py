@@ -289,7 +289,7 @@ def mainScreenHit(coords): # Hit detection for the user on the main canvas, taki
 				else:
 					mainCanvas.move(pEntity, -50, 0)
 
-def mainPress(event):
+def mainPress(event): # Determines the outcome of the user pressing a key on the lobby screen
 	global direction #Take in the current controls used and the state of the player's movement
 	global controls
 	global movx
@@ -375,12 +375,12 @@ def save(): # This is the function to save the stats of the player, their curren
 
 	tk.messagebox.showinfo("Save confirmed","Save has been confirmed") # Inform the user that their save has been successful
 
-def leaderboard(type):
-	save()
-	leaderboard= tk.Tk()
-	leaderboard.geometry("300x300")
-	leaderboard.title(type + " leaderboard")
-	leaderboard.resizable(0, 0)
+def leaderboard(type): # Function to display the leaderboard screen
+	save() # Save the user's progress, so that all the most up to date stats are shown
+	leaderboard= tk.Tk() # Create the window for the leaderboard
+	leaderboard.geometry("300x300") # Size the window appropriately, small as it is a sub window
+	leaderboard.title(type + " leaderboard") # Title the window appropriate to the skill shown
+	leaderboard.resizable(0, 0) # This means the user can make it bigger if they wish
 
 	titleLabel= tk.Label(leaderboard, text = "Top 5 Accounts by EXP ("+type+"):")
 
@@ -422,7 +422,7 @@ def leaderboard(type):
 	firstLabel = tk.Label(leaderboard, text = "1. " + players[4][0] + "      " + str(players[4][1]))
 	secondLabel = tk.Label(leaderboard, text = "2. " + players[3][0] + "      " + str(players[3][1]))
 	thirdLabel = tk.Label(leaderboard, text = "3. " + players[2][0] + "      " + str(players[2][1]))
-	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0]) + "      " + str(players[1][1])
+	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0] + "      " + str(players[1][1]))
 	fifthLabel = tk.Label(leaderboard, text = "5. " + players[0][0] + "      " + str(players[0][1]))
 	  
 	titleLabel.grid(row=1,column=1)
