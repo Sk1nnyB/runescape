@@ -547,66 +547,71 @@ class slime: # This is the class for each slime object
 
 		self.sEntity =  gameCanvas.create_image(xCoord, yCoord, image = self.sModel) # It will then generate an entity for itself
 
-	def move(self):
+	def move(self): # This creates the movement of the slime
 
-		global health
+		global health # This finds the current health of the player
+ 
+		pCoords = gameCanvas.coords(gEntity) # The players coordinates are also found
+		self.sCoords = gameCanvas.coords(self.sEntity) # It then finds it's own coordinates
 
-		pCoords = gameCanvas.coords(gEntity)
-		self.sCoords = gameCanvas.coords(self.sEntity)
+		if pCoords[0] > self.sCoords[0]: # If the player is further to the right
+			gameCanvas.move(self.sEntity, self.speed, 0) # It will move at a speed appropriate for it's level
+			self.slimeDirectionX = "right" # And set it's X direction to the right
 
-		if pCoords[0] > self.sCoords[0]:
-			gameCanvas.move(self.sEntity, self.speed, 0)
-			self.slimeDirectionX = "right"
-
-		elif pCoords[0] < self.sCoords[0]:
+		elif pCoords[0] < self.sCoords[0]: # This is the same but will move and set X direction to the left
 			gameCanvas.move(self.sEntity, -self.speed, 0)
-			self.slimeDirectionX = "left"
+			self.slimeDirectionX = "left" 
 
-		if pCoords[1] > self.sCoords[1]:
+		else: # This helps to create the bobble effect, created naturally by their inability to sometimes line up by preventing line ups
+			gameCanvas.move(self.sEntity, 0, random.randint(-2,2)) 
+
+		if pCoords[1] > self.sCoords[1]: # This works the same but for the Y direction going down
 			gameCanvas.move(self.sEntity, 0, self.speed)
 			self.slimeDirectionY = "down"
 
-		elif pCoords[1] < self.sCoords[1]:
+		elif pCoords[1] < self.sCoords[1]: # This works the same but for the Y direction going up
 			gameCanvas.move(self.sEntity, 0, -self.speed)
 			self.slimeDirectionY = "up"
 
-		pHitBox = gameCanvas.bbox(gEntity)
-		if pHitBox[0] < self.sCoords[0] < pHitBox[2]:
-			if pHitBox[1] < self.sCoords[1] < pHitBox[3]:
-				health = health - self.attack
-				gameCanvas.itemconfig(healthText,text=health)
-				rebound = (self.speed * 18)
-				if self.slimeDirectionX == "right":
-					gameCanvas.coords(self.sEntity, self.sCoords[0] - rebound, self.sCoords[1])
+		else: # This also helps the bobble effect, further preventing line ups
+			gameCanvas.move(self.sEntity, random.randint(-2,2) , 0) 
+
+		pHitBox = gameCanvas.bbox(gEntity) # This finds the current hitbox of the player
+		if pHitBox[0] < self.sCoords[0] < pHitBox[2]: # If the slime is within the left and right of the hitbox
+			if pHitBox[1] < self.sCoords[1] < pHitBox[3]: # And the top and bottom of the hit box
+				health = health - self.attack # Damage the player equal to their attack
+				gameCanvas.itemconfig(healthText,text=health) # Then update their life total UI accordingly
+				if self.slimeDirectionX == "right": # Then move in the opposite direction so as to not chain hits
+					gameCanvas.coords(self.sEntity, self.sCoords[0] - 180, self.sCoords[1])
 				elif self.slimeDirectionX == "left":
-					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] + rebound)
+					gameCanvas.coords(self.sEntity, self.sCoords[0] + 180, self.sCoords[1])
 				if self.slimeDirectionY == "down":
-					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] - rebound)
+					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] - 180)
 				elif self.slimeDirectionY == "up":
-					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] + rebound) 
+					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] + 180) 
 
-	def hit(self, damage):
-		self.health = self.health - damage
+	def hit(self, damage): # Function so that the slime will take damage
+		self.health = self.health - damage # Update the slimes health to take the damage
 		
-def playerAttack(coords):
+def playerAttack(coords): # Function for hit registration and damage from player
 	
-	global attacking
-	global slimeList
-	global direction
+	global attacking # Sets the current status of the player
+	global slimeList # Gets all the slimes on screen
+	global direction # Gets the direction the player is swinging in
 
-	if attacking == 0:
-		attacking = 1
-		pCoords = coords
-		count = 0
+	if attacking == 0: # If they are not already attacking
+		attacking = 1 # They are now attacking
+		pCoords = coords # Get the coords of the player
+		count = 0 # Count the current frame in the swing
 
-		attackFrames = [attackFrame1, attackFrame2, attackFrame3, attackFrame4, attackFrame5, attackFrame6, attackFrame7, attackFrame8, attackFrame9, attackFrame10]
+		attackFrames = [attackFrame1, attackFrame2, attackFrame3, attackFrame4, attackFrame5, attackFrame6, attackFrame7, attackFrame8, attackFrame9, attackFrame10] # Load each frame of the attack swing
 
-		for frame in attackFrames:
-			count = count + 1
-			gameCanvas.itemconfig(gEntity, image=frame)
+		for frame in attackFrames: # For each frame in the swing
+			count = count + 1 # Add one to the current frame count
+			gameCanvas.itemconfig(gEntity, image=frame) # Update the playermodel
 			mainWindow.update()
-			time.sleep(0.04)
-			if count == 5:
+			time.sleep(0.02)
+			if count == 5:				
 				for slime in slimeList:
 					hit = False
 					if direction == "left":
@@ -614,11 +619,11 @@ def playerAttack(coords):
 							hit = True
 							gameCanvas.move(slime.sEntity, -180, 0)
 					elif direction == "up":
-						if (pCoords[1] - 120 < slime.sCoords[1] < pCoords[1]) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
+						if (pCoords[1] - 150 < slime.sCoords[1] < pCoords[1]) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
 							hit = True
 							gameCanvas.move(slime.sEntity, 0, -180)
 					elif direction == "down":
-						if (pCoords[1] < slime.sCoords[1] < pCoords[1] + 120) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
+						if (pCoords[1] < slime.sCoords[1] < pCoords[1] + 150) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
 							hit = True
 							gameCanvas.move(slime.sEntity, 0, 180)
 					else:
@@ -632,6 +637,9 @@ def playerAttack(coords):
 						if slime.health <= 0:
 							gameCanvas.delete(slime.sEntity)
 							slimeList.remove(slime)
+					else:
+						slime.move()
+					mainWindow.update()
 
 
 		gameCanvas.itemconfig(gEntity, image=playerModel)
@@ -1300,10 +1308,10 @@ def floorScreen():
 			slimeList.append(slime(types[slimeCount]))
 			slimeCount = slimeCount + 1
 	
-	if health < 0:
-		deathScreen()
-	elif len(slimeList) == 0:
+	if len(slimeList) == 0:
 		victoryScreen()
+	else:
+		deathScreen()
  
 def deathScreen():
 
