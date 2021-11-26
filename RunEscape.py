@@ -441,23 +441,23 @@ def leaderboard(type): # Function to display the leaderboard screen
 def playerScreen():
 	pass
 
-def control(controls):
-	global controlWindow
+def control(controls): # Shows the screen of changeable controls, taking in the current controls (or control attempt in cases of failure)
+	global controlWindow # Make the control window available to controlsSave()
 
-	controlWindow= tk.Tk()
-	controlWindow.geometry("500x500")
-	controlWindow.title("Controls")
-	controlWindow.resizable(0, 0)
+	controlWindow= tk.Tk() # Create the window for the control window
+	controlWindow.geometry("500x500") # Size the window appropriately, small as it is a sub window 
+	controlWindow.title("Controls") # Title the window appropriate to the skill shown
+	controlWindow.resizable(0, 0) # This means the user cannot resize
 
-	titleLabel =tk.Label(controlWindow, text = "-=-=- CONTROLS -=-=-")
+	titleLabel =tk.Label(controlWindow, text = "-=-=- CONTROLS -=-=-") # Create text for the user to title what they are changing
 
-	leftInput = tk.StringVar(controlWindow, controls[0])
+	leftInput = tk.StringVar(controlWindow, controls[0]) # Create input variables for each control, with the current ones already input
 	rightInput = tk.StringVar(controlWindow, controls[1])
 	upInput = tk.StringVar(controlWindow, controls[2])
 	downInput = tk.StringVar(controlWindow, controls[3])
 	attackInput = tk.StringVar(controlWindow, controls[4])
 	
-	leftLabel = tk.Label(controlWindow, text = "Move Left:")
+	leftLabel = tk.Label(controlWindow, text = "Move Left:") # Create input text labels to show each controls input field that caputures the input variable
 	leftFetch = tk.Entry(controlWindow,textvariable = leftInput)
 	rightLabel = tk.Label(controlWindow, text = "Move Right:")
 	rightFetch = tk.Entry(controlWindow,textvariable = rightInput)
@@ -468,11 +468,13 @@ def control(controls):
 	attackLabel = tk.Label(controlWindow, text = "Attack:")
 	attackFetch = tk.Entry(controlWindow,textvariable = attackInput)
 
-	saveButton = tk.Button(controlWindow,text = "Save", command = lambda: controlsSave([leftInput.get(), rightInput.get(), upInput.get(), downInput.get(), attackInput.get()]))
-	  
+	# Button that runs the function to save the new controls
+	saveButton = tk.Button(controlWindow,text = "Save", command = lambda: controlsSave([leftInput.get(), rightInput.get(), upInput.get(), downInput.get(), attackInput.get()])) 
+	
+	# Put the title at the top of the grid, centered accross both 
 	titleLabel.grid(row=1,column=1, columnspan = 2)
 
-	leftLabel.grid(row=2,column=1)
+	leftLabel.grid(row=2,column=1) # Then put each row of label and button per control
 	leftFetch.grid(row=2,column=2)
 	rightLabel.grid(row=3,column=1)
 	rightFetch.grid(row=3,column=2)
@@ -483,90 +485,67 @@ def control(controls):
 	attackLabel.grid(row=6,column=1)
 	attackFetch.grid(row=6,column=2)
 
-	saveButton.grid(row=7, column =2)
+	saveButton.grid(row=7, column =2) # Finally put the button at the bottom
 
-	controlWindow.grid_rowconfigure(0, weight=1)
+	controlWindow.grid_rowconfigure(0, weight=1) # Finally center the x and y of the grid
 	controlWindow.grid_rowconfigure(8, weight=1)
 	controlWindow.grid_columnconfigure(0, weight=1)
 	controlWindow.grid_columnconfigure(3, weight=1)
 
-def controlsSave(newBinds):
-	global controls
+def controlsSave(newBinds): # Attempts to see if the new controls are savable
+	global controls # Takes in the current controls
 
 	protectedCharacters = ["1","2","3","4,","5", "6", "7", "8", "9", "0"] # These characters cannot be overwritten as they are used for cheat codes
-	tempNewBinds = []
-	error = 0
+	tempNewBinds = [] # A temporary list to store suitable inputs
+	error = 0 # This will trigger an error and stop multiple error boxes appearing in chain
 
-	for bind in newBinds:
-		if len(bind) != 1 and error == 0:
-			tk.messagebox.showerror(title="Failure",message="Ensure keybinds are single keys")
-			controlWindow.destroy()
-			control(newBinds)
+	for bind in newBinds: # For each control
+		if len(bind) != 1 and error == 0: # If it's not a single button and there is not already an error
+			tk.messagebox.showerror(title="Failure",message="Ensure keybinds are single keys") # Inform the user of their error
+			controlWindow.destroy() # Destroy the current attempt
+			control(newBinds) # Try again with the current attempt
 			error = 1
-		elif bind in protectedCharacters and error == 0:
+		elif bind in protectedCharacters and error == 0: # If it's not a num key and there is not already an error
 			tk.messagebox.showerror(title="Failure",message="Num keys cannot be overriden")
 			controlWindow.destroy()
 			control(newBinds)
 			error = 1
-		elif bind in tempNewBinds and error == 0:
+		elif bind in tempNewBinds and error == 0: # If it's not used only once and there is not already an error
 			tk.messagebox.showerror(title="Failure",message="Ensure keybinds are used only once")
 			controlWindow.destroy()
 			control(newBinds)
 			error = 1
-		else:
+		else: # Add it to the list of accepted binds
 			tempNewBinds.append(bind)
 
-	if len(tempNewBinds) == 5:
-		controls = tempNewBinds
-		save()
+	if len(tempNewBinds) == 5: # If there are 5 accepted binds
+		controls = tempNewBinds # Set them as the new controls
+		save() # And save the new controls
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
-class slime:
-	def __init__(self, type):
+class slime: # This is the class for each slime object
+	def __init__(self, type): # This creates the slime on instantiation
 
-		self.type = type
+		self.type = type # This sets it's type to the one randomly generated for it
 
-		if type == 1:
-			self.sModel = slimeModel1
-			self.attack = 1
-			self.health = 2
-			self.speed = 4
-		if type == 2:
-			self.sModel = slimeModel2
-			self.attack = 2
-			self.health = 4
-			self.speed = 6
-		if type == 3:
-			self.sModel = slimeModel3
-			self.attack = 5
-			self.health = 10
-			self.speed = 10
-		if type == 4:
-			self.sModel = slimeModel4
-			self.attack = 10
-			self.health = 20
-			self.speed = 14
-		if type == 5:
-			self.sModel = slimeModel5
-			self.attack = 15
-			self.health = 40
-			self.speed = 18
-		if type == 6:
-			self.sModel = slimeModel6
-			self.attack = 25
-			self.health = 70
-			self.speed = 25
+		models = [slimeModel1, slimeModel2, slimeModel3, slimeModel4, slimeModel5, slimeModel6]
 
-		pCoords = gameCanvas.coords(gEntity)
-		xCoord = random.randint(0, 1280)
+		# Based on it's increasing type it will have
+		self.sModel = models[type-1] # A different image
+		self.attack = ((type**2)-(type-1)*2) # Bigger attack
+		self.health =  2 + ((type**2)-(type-1)*2) # More Health
+		self.speed = 3 + ((type**2)-(type-1)*2) # Faster speed
+
+		pCoords = gameCanvas.coords(gEntity) # It will then get the co ordinates of the player
+		xCoord = random.randint(0, 1280) # And generate it's own random co ordinates on the screen
 		yCoord = random.randint(0, 720)
 		self.sCoords = [xCoord, yCoord]
-		while (pCoords[0] - 100 < xCoord < pCoords[0] + 100) and (pCoords[1] - 100 < yCoord < pCoords[1] + 100):
-			xCoord = random.randint(0, 1280)
+		while (pCoords[0] - 120 < xCoord < pCoords[0] + 120) and (pCoords[1] - 150 < yCoord < pCoords[1] + 150): # If it is too close to the player
+			xCoord = random.randint(0, 1280) # It will move further away
 			yCoord = random.randint(0, 720)
 
-		self.sEntity =  gameCanvas.create_image(xCoord, yCoord, image = self.sModel)
+		self.sEntity =  gameCanvas.create_image(xCoord, yCoord, image = self.sModel) # It will then generate an entity for itself
 
 	def move(self):
 
