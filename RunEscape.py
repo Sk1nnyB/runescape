@@ -327,32 +327,32 @@ class slime:
 		if type == 1:
 			self.sModel = slimeModel1
 			self.attack = 1
-			self.health = 10
+			self.health = 2
 			self.speed = 4
 		if type == 2:
 			self.sModel = slimeModel2
 			self.attack = 2
-			self.health = 40
+			self.health = 4
 			self.speed = 6
 		if type == 3:
 			self.sModel = slimeModel3
 			self.attack = 5
-			self.health = 100
+			self.health = 10
 			self.speed = 10
 		if type == 4:
 			self.sModel = slimeModel4
 			self.attack = 10
-			self.health = 200
+			self.health = 20
 			self.speed = 14
 		if type == 5:
 			self.sModel = slimeModel5
 			self.attack = 15
-			self.health = 400
+			self.health = 40
 			self.speed = 18
 		if type == 6:
 			self.sModel = slimeModel6
 			self.attack = 25
-			self.health = 700
+			self.health = 70
 			self.speed = 25
 
 		pCoords = gameCanvas.coords(gEntity)
@@ -402,6 +402,9 @@ class slime:
 					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] - rebound)
 				elif self.slimeDirectionY == "up":
 					gameCanvas.coords(self.sEntity, self.sCoords[0], self.sCoords[1] + rebound) 
+
+	def hit(self, damage):
+		self.health = self.health - damage
 		
 def playerAttack(coords):
 	
@@ -423,22 +426,31 @@ def playerAttack(coords):
 			time.sleep(0.04)
 			if count == 5:
 				for slime in slimeList:
+					hit = False
 					if direction == "left":
 						if (pCoords[0] - 120 < slime.sCoords[0] < pCoords[0]) and (pCoords[1] - 30 < slime.sCoords[1] < pCoords[1] + 60):
-							gameCanvas.delete(slime.sEntity)
-							slimeList.remove(slime)
+							hit = True
+							gameCanvas.move(slime.sEntity, -180, 0)
 					elif direction == "up":
 						if (pCoords[1] - 120 < slime.sCoords[1] < pCoords[1]) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
-							gameCanvas.delete(slime.sEntity)
-							slimeList.remove(slime)
+							hit = True
+							gameCanvas.move(slime.sEntity, 0, -180)
 					elif direction == "down":
 						if (pCoords[1] < slime.sCoords[1] < pCoords[1] + 120) and (pCoords[0] - 30 < slime.sCoords[0] < pCoords[0] + 60):
-							gameCanvas.delete(slime.sEntity)
-							slimeList.remove(slime)
+							hit = True
+							gameCanvas.move(slime.sEntity, 0, 180)
 					else:
 						if (pCoords[0] < slime.sCoords[0] < pCoords[0] + 120) and (pCoords[1] - 30 < slime.sCoords[1] < pCoords[1] + 60):
+							hit = True
+							gameCanvas.move(slime.sEntity, 180, 0)
+
+					if hit == True:
+						damage = 1 * level(attack) * swordLevel
+						slime.hit(damage)
+						if slime.health <= 0:
 							gameCanvas.delete(slime.sEntity)
 							slimeList.remove(slime)
+
 
 		gameCanvas.itemconfig(gEntity, image=playerModel)
 		mainWindow.update()
@@ -508,7 +520,7 @@ def statsCollect():
 		elif i > 11:
 			break
 
-	userFile.close()  
+	userFile.close()   
 
 def skillingActivity(skill):
 
@@ -761,7 +773,7 @@ def skillingActivity(skill):
 			elif direction == "up":
 				mainCanvas.move(pEntity, -50, 50)
 			else:
-				mainCanvas.move(pEntity, -50, 0)
+				mainCanvas.move(pEntity, -50, 0) 
 
 # -=-=-=-=- Functions for movement -=-=-=-=-  
 
@@ -770,13 +782,13 @@ def keyRelease(event):
 	global movy
 
 	movx = 0
-	movy = 0
+	movy = 0 
 
 def mainMove():
 	coords = mainCanvas.coords(pEntity)
 	mainScreenHit(coords)
 	mainCanvas.move(pEntity, movx, movy)
-	mainCanvas.after(30, mainMove)
+	mainCanvas.after(30, mainMove) 
 
 def gameMove():
 
@@ -801,7 +813,7 @@ def gameMove():
 
 	aimTriangle = gameCanvas.create_polygon(coords, fill="red",outline="black")
 
-	gameCanvas.after(10, gameMove)
+	gameCanvas.after(10, gameMove) 
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
@@ -849,7 +861,7 @@ def loginWindow():
 	loginWindow.grid_columnconfigure(0, weight=1)
 	loginWindow.grid_columnconfigure(3, weight=1)
 	  
-	loginWindow.mainloop()  
+	loginWindow.mainloop()   
 
 def mainWindow():
 	
@@ -883,7 +895,7 @@ def mainWindow():
 
 	statsCollect()
 
-	mainScreen()
+	mainScreen() 
 
 # -=-=-=-=- Functions for making screens -=-=-=-=-
 
@@ -994,7 +1006,7 @@ def mainScreen():
 
 	mainMove()
 
-	mainWindow.mainloop()
+	mainWindow.mainloop() 
 
 def floorScreen():
 
@@ -1091,7 +1103,7 @@ def floorScreen():
 		deathScreen()
 	elif len(slimeList) == 0:
 		victoryScreen()
-
+ 
 def deathScreen():
 
 	global deathCanvas
