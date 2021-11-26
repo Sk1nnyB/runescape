@@ -895,7 +895,7 @@ def skillingActivity(activity): # Allows the user to skill at an entity
 			loadingPopup.update_idletasks() # Then update the bar
 			loadingBar['value'] += 5 # By adding 5 to the value
 			time.sleep(delay/20) # Then wait for the next tick of skilling
-
+		mainCanvas.itemconfig(pEntity, image=playerModel) # Reset the playermodel
 		skilling = 0 # Set that the user is no longer skilling
 		movx = 0 # Reset the velocity of the user (in case key was still held)
 		movy = 0 
