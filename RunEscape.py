@@ -451,14 +451,10 @@ def playerScreen(): # Function to display the player's stats
 	global playerWindow # Allows it to be destroyed by exit 
 
 	playerWindow= tk.Tk() # Create the window for the player
-	playerWindow.geometry("450x150") # Size the window appropriately, small as it is a sub window
-	playerWindow.title("Player Stats") # Title the window to show it is player stats
+	playerWindow.geometry("325x150") # Size the window appropriately, small as it is a sub window
+	playerWindow.title("Player Stats: "+user) # Title the window to show it is player stats
 	playerWindow.configure(bg='#7c3f00') # Set the background to brown to resemble a backpack
 	playerWindow.resizable(0, 0) # This means the user cannot resize the window
-
-	#modelLabel = tk.Label(playerWindow, image = model) # Get the player model as a label
-	#modelLabel.image = model
-	userLabel = tk.Label(playerWindow, text = "Username:" +  "      " + user, bg="#562b00", fg="white") # Make it appear as though they are pack of the "backpack"
 
 	skillLabel = tk.Label(playerWindow, text = "-=- LOBBY SKILLS -=-", bg="#562b00", fg="white") # Lobby Skills
 	wcLabel = tk.Label(playerWindow, text = "Woodcutting:" +  "      " + str(level(woodcutting)), bg="#562b00", fg="white")
@@ -478,26 +474,23 @@ def playerScreen(): # Function to display the player's stats
 	swordLabel = tk.Label(playerWindow, text = "Sword:" +  "      " + str(swordLevel), bg="#562b00", fg="white") 
 	armourLabel = tk.Label(playerWindow, text = "Armour:" +  "      " + str(armourLevel), bg="#562b00", fg="white") 
 
-	#modelLabel.grid(row=0,column=0, rowspan = 4) # Place the player model on the right, in line with the two major stat sections
-	userLabel.grid(row=4,column=0) # Put the username beneath  
-
 	skillLabel.grid(row = 0, column= 1) # Place the lobby skills on the right of the user model
 	wcLabel.grid(row = 1, column= 1)
 	miningLabel.grid(row = 2, column= 1)  
 	craftLabel.grid(row = 3, column= 1) 
 
-	dungeonLabel.grid(row = 0, column= 2) # Place the dungeon skills on the right of the user model
-	hpLabel.grid(row = 1, column= 2)
-	attackLabel.grid(row = 2, column= 2) 
-	floorLabel.grid(row = 3, column= 2) 
+	dungeonLabel.grid(row = 0, column= 2, padx=10) # Place the dungeon skills on the right of the user model
+	hpLabel.grid(row = 1, column= 2, padx=10)
+	attackLabel.grid(row = 2, column= 2, padx=10) 
+	floorLabel.grid(row = 3, column= 2, padx=10) 
 
 	resLabel.grid(row = 4, column= 1) # Place the materials beneath the lobby skills
 	woodLabel.grid(row = 5, column= 1)
 	metalLabel.grid(row = 6, column= 1)
 
-	eqmntLabel.grid(row = 4, column= 2) # Place the equipment beneath the dungeon skills
-	swordLabel.grid(row = 5, column= 2)
-	armourLabel.grid(row = 6, column= 2)
+	eqmntLabel.grid(row = 4, column= 2, padx=10) # Place the equipment beneath the dungeon skills
+	swordLabel.grid(row = 5, column= 2, padx=10)
+	armourLabel.grid(row = 6, column= 2, padx=10)
 
 def control(controls): # Shows the screen of changeable controls, taking in the current controls (or control attempt in cases of failure)
 	global controlWindow # Make the control window available to controlsSave()

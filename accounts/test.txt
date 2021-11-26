@@ -1,6 +1,6 @@
 Username:test
 Password:test
-HP:30
+HP:41881583897900
 Attack:30
 Woodcutting:20
 Mining:30
