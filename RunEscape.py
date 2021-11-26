@@ -63,106 +63,108 @@
 # metal = metal of the player
 # swordLevel = sword level of the player
 # armourLevel = amour level of the player
+# controls = the corresponding keys are: [left, right, up, down, attack]
 
 # attacking = if the user is currently in attack animation
 # direction = the current facing direction of the player
 # health = current health of the user
 # healthText = health ui output
 
-import tkinter as tk
-from tkinter import messagebox
-from tkinter.ttk import Progressbar
-from tkinter import HORIZONTAL
-import os 
-import math
-import random
-import time
+import tkinter as tk # import tkinter for windows and labels and canvases etc.
+from tkinter import messagebox # import for message boxes
+from tkinter.ttk import Progressbar # import for progress bar when skilling
+from tkinter import HORIZONTAL # import for horizontal movement for progress bar
+import os # import os for finding files
+import math # import maths for level boundries
+import random # import for random numbers in skill timing and slime options
+import time # import for smoother animation and time between slimes
 
 # -=-=-=-=- General functions -=-=-=-=-
 
 def data(line): # Seperates the number in a file line
-	data = "" 
-	trigger = 0
-	for i in range (0, len(line)):
-		if trigger == 1:
-			data = data + line[i]
-		if line[i] == ":":
-			trigger = 1
+	data = "" # Starts with no data
+	trigger = 0 # Indicates the number in the file has been reached
+	for i in range (0, len(line)): # For each character in the line
+		if trigger == 1: # If it has reached the characters it wants
+			data = data + line[i] # Add it to the string that will form the characters it wants
+		if line[i] == ":": # When it reaches the point of the data
+			trigger = 1 # Gather the data
 
-	return(data) 
+	return(data) # Return the data
 
 def level(exp): # Converts exp to level
 	
-	if exp < 100:
-		level = 1
-	else:
-		level = math.trunc(math.log((exp/100), 1.5) + 2)
+	if exp < 100: # This is because I don't think the function works in reverse when below 2
+		level = 1 # Set the players level as 1
+	else: # Otherwise use the function
+		level = math.trunc(math.log((exp/100), 1.5) + 2) # Work out the level of the skill by finding which boundry it crosses last
 
-	return level
+	return level # Return the level of the skill
 
 def endAccept(event): # Moves player back to lobby
-	try:
-		deathCanvas.destroy()
-	except:
-		victoryCanvas.destroy()
-	mainScreen()
+	try: # If the death canvas exists
+		deathCanvas.destroy() # Destroy it
+	except: # Otherwise the victory canvas exists
+		victoryCanvas.destroy() # Destroy the victory canvas
+	mainScreen() # Return to the lobby canvas
 
 # -=-=-=-=- Functions for login screen -=-=-=-=-
 
-def login():
-	global user
-	user = usernameInput.get()
-	password = passwordInput.get()
+def login(): # Function to log the user in
+	global user # Allows user to be used later
 
-	errorOutput.config(text="")
+	user = usernameInput.get() # Get the username from the username input field
+	password = passwordInput.get() # Get the password from the username input field
 
-	if user == "" or user.isspace():
-		errorOutput.config(text="Username cannot be empty")
-	elif password == "" or password.isspace():
-		errorOutput.config(text="Password cannot be empty")
-	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")):
-		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
-		for i, line in enumerate(newFile):
-			if i == 0:
-				usernameFile = data(line)
-			elif i == 1:
-				passwordFile = data(line)
-			elif i > 1:
-				break
+	errorOutput.config(text="") # Reset the error field (they haven't commited an error yet)
 
-		newFile.close()
+	if user == "" or user.isspace(): # If they haven't filled out the username field
+		errorOutput.config(text="Username cannot be empty") # Remind them to fill it out
+	elif password == "" or password.isspace(): # If they haven't filled out the password field
+		errorOutput.config(text="Password cannot be empty") # Remind them to fill it out
+	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")): # If a file for that user exists
+		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r") # Open that file
+		for i, line in enumerate(newFile): # For each line in the file
+			if i == 0: # If it's the first line
+				usernameFile = data(line) # Take the username data from that line
+			elif i == 1: # If it's the second line
+				passwordFile = data(line) # Take the password data from that line
+			elif i > 1: # Once you are done with the file
+				break # Stop looking through it (takes up less memory)
 
-		if usernameFile != user + "\n":
-			errorOutput.config(text="Username is incorrect")
-		elif passwordFile != password + "\n":
-			errorOutput.config(text="Password is incorrect")
-		else:
-			errorOutput.config(text="Welcome Adventurer!")
-			loginWindow.destroy()
-	else:
-		errorOutput.config(text="Username does not exist")
+		newFile.close() # Close the file
 
-def createAccount():
-	global user
+		if usernameFile != user + "\n": # If the username doesn't match the username in the file (useless now as it will always be the same as file name but maybe changable in the future)
+			errorOutput.config(text="Username is incorrect") # Tell them they got it wrong
+		elif passwordFile != password + "\n": # If the password doesn't match the password in the file 
+			errorOutput.config(text="Password is incorrect") # Tell them they got it wrong
+		else: # Otherwise they got everything right
+			errorOutput.config(text="Welcome Adventurer!") # Display the welcome message
+			loginWindow.destroy() # Close the log in window, it is done this way to emulate a real RPG launcher
+	else: # Otherwise the file doesn't exist
+		errorOutput.config(text="Username does not exist") # Inform them there is no account
 
-	user = usernameInput.get()
-	password = passwordInput.get()
-	errorOutput.config(text="")
+def createAccount(): # Function to create a new user account
+	global user # Allows user to be used later
 
-	if os.path.isdir("accounts") == False:
-		os.mkdir("accounts")
+	user = usernameInput.get() # Get the username from the username input field
+	password = passwordInput.get() # Get the password from the username input field
+	errorOutput.config(text="") # Reset the error field (they haven't commited an error yet)
+
+	if os.path.isdir("accounts") == False: # If there is not a folder for the creation of accounts
+		os.mkdir("accounts") # Make one. A different folder is used to scan when doing leaderboards later. This is incase other text files such as arena save files are made.
 	
-	if user == "" or user.isspace():
-		errorOutput.config(text="Username cannot be empty")
-	elif len(user) > 10:
-		errorOutput.config(text="Username longer than 10 characters")
-	elif password == "" or password.isspace():
-		errorOutput.config(text="Password cannot be empty")
-	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")):
-		errorOutput.config(text="Account Already Exists")
-	else:
-		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
-		newFile.write("Username:"+ user + "\n")
+	if user == "" or user.isspace():  # If they haven't filled out the username field
+		errorOutput.config(text="Username cannot be empty") # Remind them to fill it out
+	elif len(user) > 10: # If the username is too long for the leaderboards (and for convenience)
+		errorOutput.config(text="Username longer than 10 characters") # Inform them it is too long
+	elif password == "" or password.isspace(): # If they haven't filled out the password field
+		errorOutput.config(text="Password cannot be empty") # Remind them to fill it out
+	elif os.path.exists(os.path.join(os.getcwd(), "accounts", user + ".txt")): # If there is already an account of this name
+		errorOutput.config(text="Account Already Exists") # Inform them that account already exists
+	else: # Otherwise it is okay to make a file for that account
+		newFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w") # Make the file for the account
+		newFile.write("Username:"+ user + "\n") # Write each saveable stat to a seperate line
 		newFile.write("Password:"+ password + "\n")
 		newFile.write("HP:0\n")
 		newFile.write("Attack:0\n")
@@ -174,31 +176,36 @@ def createAccount():
 		newFile.write("Metal:0\n")
 		newFile.write("Sword Level:1\n")
 		newFile.write("Armour Level:1\n")
-		newFile.close()
-		errorOutput.config(text="Account Successfully Created!")
+		newFile.write("Left:a\n") # Then write all the controls
+		newFile.write("Right:d\n")
+		newFile.write("Up:w\n")
+		newFile.write("Down:s\n")
+		newFile.write("Attack:u\n")
+		newFile.close() # Close the file once you are done
+		errorOutput.config(text="Account Successfully Created!") # Inform the user their account has been made
 
 # -=-=-=-=- Functions for main screen -=-=-=-=-
 
-def mainScreenHit(coords):
-	global movx
+def mainScreenHit(coords): # Hit detection for the user on the main canvas, taking in the center of the player model
+	global movx # Allows the direction of the player to be changed
 	global movy
 
-	doorCoords = mainCanvas.bbox(dEntity)
+	doorCoords = mainCanvas.bbox(dEntity) # Obtain the hitbox positions of all the interactable skilling entities
 	treeCoords = mainCanvas.bbox(tEntity)
 	oreCoords = mainCanvas.bbox(oEntity)
 	anvilCoords = mainCanvas.bbox(aEntity)
 	standCoords = mainCanvas.bbox(sEntity)
 	
-	if doorCoords[0] < coords[0] < doorCoords[2]:
-		if doorCoords[1] < coords[1] < doorCoords[3]:
-			movx = 0
+	if doorCoords[0] < coords[0] < doorCoords[2]: # If the player is in between the right and left of the hitbox
+		if doorCoords[1] < coords[1] < doorCoords[3]: # If the player is inbetween the top and bottom of the hitbox
+			movx = 0 # Stop all movement
 			movy = 0
-			prompt= tk.messagebox.askquestion("Enter the Dungeon","You are entering floor: " + str(floor + 1) + ". Game will autosave but saving will be disabled. Do you want to continue?")
-			if prompt=='yes':
-				save()
-				floorScreen() 
-			else:
-				if direction == "left":
+			prompt= tk.messagebox.askquestion("Enter the Dungeon","You are entering floor: " + str(floor + 1) + ". Game will autosave but saving will be disabled. Do you want to continue?") # Ensure that they wish to do this
+			if prompt=='yes': # If they do then start the skill
+				save() # In this one the game is saved, to mimic that boss fights are also not saved while in play
+				floorScreen() # Start the canvas for the arena floor
+			else: # Otherwise if they do not want to do this activity
+				if direction == "left": # Move them away from the activity in the direction they came from, so they do not trigger it again
 					mainCanvas.move(pEntity, 50, 0)
 				elif direction == "down":
 					mainCanvas.move(pEntity, -50, -50)
@@ -207,7 +214,7 @@ def mainScreenHit(coords):
 				else:
 					mainCanvas.move(pEntity, -50, 0)
 
-	if treeCoords[0] < coords[0] < treeCoords[2]:
+	if treeCoords[0] < coords[0] < treeCoords[2]: # This is the same as the door detection but without saving, for woodcutting
 		if treeCoords[1] < coords[1] < treeCoords[3]:
 			movx = 0
 			movy = 0
@@ -224,7 +231,7 @@ def mainScreenHit(coords):
 				else:
 					mainCanvas.move(pEntity, -50, 0)
 
-	if oreCoords[0] < coords[0] < oreCoords[2]:
+	if oreCoords[0] < coords[0] < oreCoords[2]: # This is the same as woodcutting, for mining
 		if oreCoords[1] < coords[1] < oreCoords[3]:
 			movx = 0
 			movy = 0
@@ -241,11 +248,11 @@ def mainScreenHit(coords):
 				else:
 					mainCanvas.move(pEntity, -50, 0)
 
-	if anvilCoords[0] < coords[0] < anvilCoords[2]:
+	if anvilCoords[0] < coords[0] < anvilCoords[2]: # This is the same as woodcutting, for crafting a better sword
 		if anvilCoords[1] < coords[1] < anvilCoords[3]:
 			movx = 0
 			movy = 0
-			message = "Would you like to upgrade your sword?\n"
+			message = "Would you like to upgrade your sword?\n" # Except a longer message is shown as materials are used up in this skill
 			message = message + "Metal Need: " + str(swordLevel) + "(" + str(metal) + ")\n"
 			message = message + "Wood Need: " + str(swordLevel) + "(" + str(wood) + ")"
 			prompt= tk.messagebox.askquestion("Crafting",message)
@@ -261,7 +268,7 @@ def mainScreenHit(coords):
 				else:
 					mainCanvas.move(pEntity, -50, 0)
 
-	if standCoords[0] < coords[0] < standCoords[2]:
+	if standCoords[0] < coords[0] < standCoords[2]: # This is the same as the anvil, for crafting better armour
 		if standCoords[1] < coords[1] < standCoords[3]:
 			movx = 0
 			movy = 0
@@ -282,12 +289,12 @@ def mainScreenHit(coords):
 					mainCanvas.move(pEntity, -50, 0)
 
 def mainPress(event):
-	global direction
+	global direction #Take in the current controls used and the state of the player's movement
 	global controls
 	global movx
 	global movy 
 
-	global hp
+	global hp # Take in all the cheat code changed stats
 	global attack
 	global woodcutting
 	global mining 
@@ -298,24 +305,23 @@ def mainPress(event):
 	global swordLevel
 	global armourLevel
 
-	coords = mainCanvas.coords(pEntity)
+	coords = mainCanvas.coords(pEntity) # Obtain the current 
 
-	if event.char == "a" and skilling == 0 and coords[0] > 0 :
-		direction = "left"
-		movx = -10
-	elif event.char == "d" and skilling == 0 and coords[0] < 1280:
+	if event.char == controls[0] and skilling == 0 and coords[0] > 10 : # If they player is not currently out of bounds, and doing so would not take them, and not skilling
+		direction = "left" # set their direction of motion
+		movx = -10 # and velocity
+	elif event.char == controls[1] and skilling == 0 and coords[0] < 1270: # Repeat for each direction
 		direction = "right"
 		movx = 10
-	elif event.char == "w" and skilling == 0 and coords[1] > 0:
+	elif event.char == controls[2] and skilling == 0 and coords[1] > 10:
 		direction = "up"
 		movy = -10
-	elif event.char == "s" and skilling == 0 and coords[1] < 720:
+	elif event.char == controls[3] and skilling == 0 and coords[1] < 710:
 		direction = "down"
 		movy = 10
-	elif event.char == "1" and skilling == 0:
-		print("test")
-		exp = 100 * round(1.5 ** (level(hp) + 8))
-		hp = exp
+	elif event.char == "1" and skilling == 0: # If the player is not skilling
+		exp = 100 * round(1.5 ** (level(hp) + 8)) # Activate the according cheat code
+		hp = exp # Update their stat
 	elif event.char == "2"  and skilling == 0:
 		exp = 100 * round(1.5 ** (level(attack) + 8))
 		attack = exp
@@ -339,14 +345,16 @@ def mainPress(event):
 	elif event.char == "0" and skilling == 0:
 		armourLevel = armourLevel + 10
 
+	# The game is not saved here, so will not reflect in the leaderboard but saving the game and having the popup would make it obvious these are cheat codes
+
 # -=-=-=-=- Functions for menu -=-=-=-=-  
 
-def save():
+def save(): # This is the function to save the stats of the player, their current state in the arena floor is not saved in order to give it a roguelike game feeling
 
-	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r") # Open the save file of the user in a readable fashion
 	
-	lines = userFile.readlines()
-	lines[2] = "HP:" + str(hp) + "\n"
+	lines = userFile.readlines() # reach line to a file, to preserve all settings in it
+	lines[2] = "HP:" + str(hp) + "\n" # change the line of each stat file to represent their new stat exp / level
 	lines[3] = "Attack:" + str(attack) + "\n"
 	lines[4] = "Woodcutting:" + str(woodcutting) + "\n"
 	lines[5] = "Mining:" + str(mining) + "\n"
@@ -357,14 +365,17 @@ def save():
 	lines[10] = "Sword Level:" + str(swordLevel) + "\n"
 	lines[11] = "Armour Level:" + str(armourLevel) + "\n"
 
-	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w")
-	userFile.writelines(lines)
+	userFile.close() # Close the readable file
 
-	userFile.close()
+	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "w") # Open the file again in a writable mode
+	userFile.writelines(lines) # Replace this file with the new one created in memory
 
-	tk.messagebox.showinfo("Save confirmed","Save has been confirmed")
+	userFile.close() # Close the new file
+
+	tk.messagebox.showinfo("Save confirmed","Save has been confirmed") # Inform the user that their save has been successful
 
 def leaderboard(type):
+	save()
 	leaderboard= tk.Tk()
 	leaderboard.geometry("300x300")
 	leaderboard.title(type + " leaderboard")
@@ -380,7 +391,7 @@ def leaderboard(type):
 
 		for i, line in enumerate(file):
 			if i == 0:
-				username = data(line)
+				username = data(line). rstrip("\n")
 			if i == 2 and type == "HP":
 				score = int(data(line))
 			elif i == 3 and type == "Attack":
@@ -407,11 +418,11 @@ def leaderboard(type):
 	while len(players) < 5:
 		players.insert(0,["N/A","N/A"])
 
-	firstLabel = tk.Label(leaderboard, text = "1. " + players[4][0]. rstrip("\n")+ "      " + str(players[4][1]))
-	secondLabel = tk.Label(leaderboard, text = "2. " + players[3][0]. rstrip("\n")+ "      " + str(players[3][1]))
-	thirdLabel = tk.Label(leaderboard, text = "3. " + players[2][0]. rstrip("\n")+ "      " + str(players[2][1]))
-	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0]. rstrip("\n")+ "      " + str(players[1][1]))
-	fifthLabel = tk.Label(leaderboard, text = "5. " + players[0][0]. rstrip("\n") + "      " + str(players[0][1]))
+	firstLabel = tk.Label(leaderboard, text = "1. " + players[4][0] + "      " + str(players[4][1]))
+	secondLabel = tk.Label(leaderboard, text = "2. " + players[3][0] + "      " + str(players[3][1]))
+	thirdLabel = tk.Label(leaderboard, text = "3. " + players[2][0] + "      " + str(players[2][1]))
+	fourthLabel = tk.Label(leaderboard, text = "4. " + players[1][0]) + "      " + str(players[1][1])
+	fifthLabel = tk.Label(leaderboard, text = "5. " + players[0][0] + "      " + str(players[0][1]))
 	  
 	titleLabel.grid(row=1,column=1)
 	firstLabel.grid(row=2,column=1)
@@ -429,9 +440,12 @@ def playerScreen():
 	pass
 
 def controls():
-	#[left, right, up, down, attack]
-	protectedCharacters = ["1","2","3","4,","5", "6", "7", "8", "9", "0", "Ctrl"]
-	pass
+	protectedCharacters = ["1","2","3","4,","5", "6", "7", "8", "9", "0"] # These characters cannot be overwritten as they are used for cheat codes
+
+	controlWindow= tk.Tk()
+	controlWindow.geometry("300x300")
+	controlWindow.title(type + " leaderboard")
+	controlWindow.resizable(0, 0)
 
 # -=-=-=-=- Functions for game window -=-=-=-=-
 
@@ -575,24 +589,25 @@ def playerAttack(coords):
 
 def gamePress(event):
 	global direction
+	global controls
 	global movx
 	global movy
 
 	coords = gameCanvas.coords(gEntity)
 
-	if event.char == "a" and attacking == 0 and coords[0] > 0 :
+	if event.char == controls[0] and attacking == 0 and coords[0] > 0 :
 		direction = "left"
 		movx = -10
-	elif event.char == "d" and attacking == 0 and coords[0] < 1280:
+	elif event.char == controls[1] and attacking == 0 and coords[0] < 1280:
 		direction = "right"
 		movx = 10
-	elif event.char == "w" and attacking == 0 and coords[1] > 0:
+	elif event.char == controls[2] and attacking == 0 and coords[1] > 0:
 		direction = "up"
 		movy = -10
-	elif event.char == "s" and attacking == 0 and coords[1] < 720:
+	elif event.char == controls[3] and attacking == 0 and coords[1] < 720:
 		direction = "down"
 		movy = 10
-	elif event.char == "u" and attacking == 0:
+	elif event.char == controls[4] and attacking == 0:
 		playerAttack(coords)
 
 # -=-=-=-=- Functions for skilling -=-=-=-=-   
@@ -609,8 +624,11 @@ def statsCollect():
 	global metal
 	global swordLevel
 	global armourLevel
+	global controls
 	
 	userFile = open(os.path.join(os.getcwd(), "accounts", user + ".txt"), "r")
+
+	controls = []
 
 	for i, line in enumerate(userFile):
 		if i == 2:
@@ -633,7 +651,17 @@ def statsCollect():
 			swordLevel = int(data(line))
 		elif i == 11:
 			armourLevel = int(data(line))
-		elif i > 11:
+		elif i == 12:
+			controls.append(data(line). rstrip("\n"))
+		elif i == 13:
+			controls.append(data(line). rstrip("\n"))
+		elif i == 14:
+			controls.append(data(line). rstrip("\n"))
+		elif i == 15:
+			controls.append(data(line). rstrip("\n"))
+		elif i == 16:
+			controls.append(data(line). rstrip("\n"))
+		elif i > 16:
 			break
 
 	userFile.close()   
