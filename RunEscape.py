@@ -1,5 +1,5 @@
 # Title and main screen background from https://pixabay.com/, title text generated with https://cooltext.com/, torch, tombstone, tree, stone and heart taken from https://pngimg.com/
-# Dunegeon Door png taken from https://www.pngitem.com/ and allowed for personal use, player model taken from https://www.gameart2d.com/the-knight-free-sprites.html
+# Dunegeon Door and armour stand png taken from https://www.pngitem.com/ and allowed for personal use, player model taken from https://www.gameart2d.com/the-knight-free-sprites.html
 # Anvil taken from https://www.cleanpng.com/
 # All images used are not subject to copyright as this is for personal use
 
@@ -1017,7 +1017,7 @@ def loginWindow(): # Function to make the login window
 	global passwordInput
 	global errorOutput # Allow the error label to be updated
 
-	loginWindow= tk.Tk() # Creat and size the login window
+	loginWindow= tk.Tk() # Create and size the login window
 	loginWindow.geometry("1280x720")
 	loginWindow.title("Run Escape Login") # With the correct title
 	loginWindow.resizable(0, 0) # Do not let the user rescale
@@ -1048,69 +1048,67 @@ def loginWindow(): # Function to make the login window
 	accountButton.grid(row=5,column=2)
 	errorOutput.grid(row=6,column=2)
 
-	loginWindow.grid_rowconfigure(0, weight=1)
+	loginWindow.grid_rowconfigure(0, weight=1) # Centre the x and y of the grid
 	loginWindow.grid_rowconfigure(7, weight=1)
 	loginWindow.grid_columnconfigure(0, weight=1)
 	loginWindow.grid_columnconfigure(3, weight=1)
 	  
-	loginWindow.mainloop()   
+	loginWindow.mainloop() # Then display the window
 
-def mainWindow():
+def mainWindow(): # Function to make the main window
 	
-	global mainWindow
-	global menubar
-	global controls
+	global mainWindow # To allow the main window to be manipulated by canvas, quit, etc
+	global menubar # Allow save to be enabled and disabled
+	global controls # Allow controls to be passed through to the controls screen
 
-	mainWindow = tk.Tk()
+	mainWindow = tk.Tk() # Create and size the main window
 	mainWindow.geometry("1280x720")
-	mainWindow.title("Run Escape")
-	mainWindow.resizable(0, 0)
+	mainWindow.title("Run Escape") # With the correct title
+	mainWindow.resizable(0, 0) # Do not let the user rescale
 
-	menubar = tk.Menu(mainWindow)
-	mainWindow.config(menu=menubar)
+	menubar = tk.Menu(mainWindow) # Create the top menu bar
+	mainWindow.config(menu=menubar) # Add the configuration to the main menu
 
-	menuPlayer = tk.Menu(menubar, tearoff = 0)
-	
-	menuPlayer.add_command(label="Controls", command= lambda: control(controls))
-	menuPlayer.add_command(label="Stats", command= playerScreen)
+	menuPlayer = tk.Menu(menubar, tearoff = 0) # Create the menu for the player, tearoff = 0 means it can't be dagged out
+	menuPlayer.add_command(label="Controls", command= lambda: control(controls)) # Add the function for changing controls
+	menuPlayer.add_command(label="Stats", command= playerScreen) # Add the function for displaying stats
 
-	menuLeaderboard = tk.Menu(menubar, tearoff = 0)
+	menuLeaderboard = tk.Menu(menubar, tearoff = 0) # Do this for each menu
 	menuLeaderboard.add_command(label="Floors", command= lambda: leaderboard("Floors"))
-	menuLeaderboard.add_separator()
-	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0)
+	menuLeaderboard.add_separator() # This creates a line to seperate
+	menuLevels = tk.Menu(menuLeaderboard, tearoff = 0) # Create a sub menu for each skill
 	menuLevels.add_command(label="HP", command= lambda: leaderboard("HP"))
 	menuLevels.add_command(label="Attack", command= lambda: leaderboard("Attack"))
 	menuLevels.add_command(label="Woodcutting", command= lambda: leaderboard("Woodcutting"))
 	menuLevels.add_command(label="Mining", command= lambda: leaderboard("Mining"))
 	menuLevels.add_command(label="Crafting", command= lambda: leaderboard("Crafting"))
-	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels)
+	menuLeaderboard.add_cascade(label="Levels", menu= menuLevels) # Then add the sub menu to the menu dropdown
 
-	menubar.add_command(label="Exit", command= quit)
+	menubar.add_command(label="Exit", command= quit) # This can be added without a menu, as just a command
 	menubar.add_cascade(label="Player", menu= menuPlayer)
-	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard)
+	menubar.add_cascade(label="Leaderboard", menu= menuLeaderboard) # These dropdown menus can also be added
 	menubar.add_command(label="Save", command= save)
 	menubar.add_command(label="Pause", command= pause)
 
-	statsCollect()
+	statsCollect() # Then collect all the inital stats to be stored in local memory
 
-	mainScreen() 
+	mainScreen() # And run the main canvas screen first
 
 def bossWindow(): # Function to minimise the screen for a boss key
 
 	mainWindow.wm_state('iconic') # Minimise the main screen
 
-
 # -=-=-=-=- Functions for making screens -=-=-=-=-
 
-def mainScreen():
+def mainScreen(): # Function to display the lobby canvas
 	
-	global mainCanvas
+	global mainCanvas # This allows for manipulation and movement of entities on the main canvas
 
-	global playerModel
+	global playerModel # This allows the floor canvas to use these assets
 	global heartModel
-
-	global attackFrame1 # I found the code worked best when images were fetched in the same function
-	global attackFrame2 # that the canvas was made so here each image is fetched
+ 
+	global attackFrame1 # The skilling animation frames can be used in animation functions 
+	global attackFrame2 
 	global attackFrame3
 	global attackFrame4
 	global attackFrame5
@@ -1120,32 +1118,32 @@ def mainScreen():
 	global attackFrame9
 	global attackFrame10
 
-	global slimeModel1
-	global slimeModel2
-	global slimeModel3
+	global slimeModel1 # The different slime models are also collected
+	global slimeModel2 # I found the code worked best when images were fetched in the same function
+	global slimeModel3 # that the canvas was made so here each image is fetched
 	global slimeModel4
 	global slimeModel5
 	global slimeModel6
 
-	global pEntity
+	global pEntity # Each entity in the lobby is made and available for hit box detection
 	global dEntity
 	global tEntity
 	global oEntity 
 	global aEntity
 	global sEntity
 
-	global movx
+	global movx # The velocity of the player and their direction facing and skilling status can also be changed by movement functions
 	global movy
 	global direction
 	global skilling
 	
-	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
-	mainCanvas.pack()
+	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280) # Make the canvas of the main window to be the same size as the window
+	mainCanvas.pack() # And display it
 
-	menubar.entryconfig("Save", state = "normal")
+	menubar.entryconfig("Save", state = "normal") # Re enable the save function
 
-	doorModel = tk.PhotoImage(file="dungeon_door.png")
-	doorModel = doorModel.subsample(6)
+	doorModel = tk.PhotoImage(file="dungeon_door.png") # Obtain the model for each entity
+	doorModel = doorModel.subsample(6) # And scale to suitable size for the lobby
 	heartModel = tk.PhotoImage(file="heart.png")
 	heartModel = heartModel.subsample(10)
 	treeModel = tk.PhotoImage(file="tree.png")
@@ -1159,8 +1157,8 @@ def mainScreen():
 	playerModel = tk.PhotoImage(file="player.png")
 	playerModel = playerModel.subsample(5)
 
-	attackFrame1 = tk.PhotoImage(file = "attack1.png")
-	attackFrame1 = attackFrame1.subsample(5)
+	attackFrame1 = tk.PhotoImage(file = "attack1.png") # Obtain the frame for the attack/ skilling animation
+	attackFrame1 = attackFrame1.subsample(5) # And scale to suitable size for the lobby
 	attackFrame2 = tk.PhotoImage(file = "attack2.png")
 	attackFrame2 = attackFrame2.subsample(5)
 	attackFrame3 = tk.PhotoImage(file = "attack3.png")
@@ -1180,8 +1178,8 @@ def mainScreen():
 	attackFrame10 = tk.PhotoImage(file = "attack10.png")
 	attackFrame10 = attackFrame10.subsample(5)
 		
-	slimeModel1 = tk.PhotoImage(file="jelly1.png")
-	slimeModel1 = slimeModel1.subsample(5)
+	slimeModel1 = tk.PhotoImage(file="jelly1.png")  # Obtain the model for each slime
+	slimeModel1 = slimeModel1.subsample(5) # And scale to suitable size for the lobby
 	slimeModel2 = tk.PhotoImage(file="jelly2.png")
 	slimeModel2 = slimeModel2.subsample(5)
 	slimeModel3 = tk.PhotoImage(file="jelly3.png")
@@ -1193,75 +1191,75 @@ def mainScreen():
 	slimeModel6 = tk.PhotoImage(file="jelly6.png")
 	slimeModel6 = slimeModel6.subsample(5)
 
-	dEntity = mainCanvas.create_image(640, 70, image = doorModel)
+	dEntity = mainCanvas.create_image(640, 70, image = doorModel) # Create and place each entity on the canvas
 	tEntity = mainCanvas.create_image(1150, 360, image = treeModel)
 	oEntity = mainCanvas.create_image(80, 390, image = oreModel)
 	aEntity = mainCanvas.create_image(780, 660, image = anvilModel)
 	sEntity = mainCanvas.create_image(520, 630, image = standModel)
-	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel)
+	pEntity = mainCanvas.create_image(640, 360, anchor="center", image = playerModel) # Set the user as the center of the screen when places
 
-	mainCanvas.bind("<KeyPress>", mainPress)
-	mainCanvas.bind("<KeyRelease>", keyRelease)
-	mainCanvas.focus_set()
+	mainCanvas.bind("<KeyPress>", mainPress) # Bind the key presses to their relevent funtions
+	mainCanvas.bind("<KeyRelease>", keyRelease) # Ensure the velocity stops when the key is no longer pressed
+	mainCanvas.focus_set() # This ensures the keybinds work
 
-	skilling = 0
+	skilling = 0 # Set their inital status of skilling, direction and velocity to be off (sprite faces right)
 	direction = "right"
 	movx = 0
 	movy = 0
+ 
+	mainMove() # Then constantly check the movement function to see if they need to be moved
 
-	mainMove()
+	mainWindow.mainloop() # And display the main window now it has a canvas  # Function to show lobby canvas
 
-	mainWindow.mainloop() 
+def floorScreen(): # Function to show floor canvas
 
-def floorScreen():
-
-	global gameCanvas
+	global gameCanvas # Use the global player entity in game and global game canvas
 	global gEntity
 	
-	global health
-	global healthText
+	global health # Get their current health
+	global healthText # And allow the display of it to be updated by slimes
 	
-	global movx
+	global movx # Get their movement statuses
 	global movy
 	global direction
 	global attacking
 	
-	global slimeList
-	global floorExp
+	global slimeList # Allow the list of current slimes to be edited
+	global floorExp # Allow the exp gained from this floor to be used in the victory screen
 
-	mainCanvas.destroy()
-	menubar.entryconfig("Save", state = "disabled")
+	mainCanvas.destroy() # Destroy the lobby
+	menubar.entryconfig("Save", state = "disabled") # Disable saving
 
-	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280)
-	gameCanvas.pack()
-	gameCanvas.focus_set()
+	gameCanvas= tk.Canvas(mainWindow, bg="grey", height=720, width=1280) # Create a game canvas for the floor
+	gameCanvas.pack() # Show the canvas
+	gameCanvas.focus_set() # Ensure that keybinds work
 
-	health = level(hp) * 5 * armourLevel
+	health = level(hp) * 5 * armourLevel # Get their current hp based on their stats
 
-	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1))
-	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health)
-	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel)
-	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel)
+	floorText = gameCanvas.create_text(640, 34, fill= "black", font = ('Helvetica','35','bold'), text="Current Floor: " + str(floor + 1)) # Display to the user their current floor
+	healthText = gameCanvas.create_text(1140, 34, fill= "red", font = ('Helvetica','35','bold'), text=health) # And health
+	heartIcon =  gameCanvas.create_image(1238, 32, image = heartModel) # These are all under the slimes
+	gEntity = gameCanvas.create_image(640, 360, anchor="center", image = playerModel) # So that they do not hide any
 
-	statsCollect()
+	statsCollect() # Collect the current stats of the player and load into local memory
 	
-	attacking = 0
+	attacking = 0 # Set the default movement status of the player
 	direction = "right"
 	cheatCombo = 0
 	movx = 0
 	movy = 0
 
-	gameMove()
+	gameMove() # Check to see if the player is moving
 
-	gameCanvas.bind("<KeyPress>", gamePress)
-	gameCanvas.bind("<KeyRelease>", keyRelease)
-	
-	types = []
-	floorExp = 0
+	gameCanvas.bind("<KeyPress>", gamePress) # Bind the key presses to their relevent funtions
+	gameCanvas.bind("<KeyRelease>", keyRelease) # Ensure the velocity stops when the key is no longer pressed
+	 
+	types = [] # Reset all the types of slime that need to be made
+	floorExp = 0 # Reset the exp earnable for this floor
 
-	for i in range(10 + 2*(floor)):
-		if floor  >= 5:
-			type = random.randint(1,2)
+	for i in range(10 + 3*(floor)): # For each floor level increase the slime count by 3
+		if floor  >= 5: # Based on the difficulty of the floor
+			type = random.randint(1,2) # Randomly generate harder types of slime
 		elif floor  >= 10:
 			type = random.randint(1,3)
 		elif floor >= 20:
@@ -1285,73 +1283,72 @@ def floorScreen():
 		else:
 			type = 1
 
-		types.append(type)
+		types.append(type) # Store this lime in the queue to be made
 
-		floorExp = floorExp + type * 3
+		floorExp = floorExp + type * 3 # Add exp to the earnable exp based on how hard it is
 		
-	slimeList = []
-	slimeList.append(slime(types[0]))
-	slimeCount = 1
-	count = 0
+	slimeList = [] # Reset the list of slimes on the screen
+	slimeList.append(slime(types[0])) # Add the first slime to the screen
+	count = 0 # Reset the count until another is made
 
-	while health > 0 and len(slimeList) > 0: 
-		for entity in slimeList:
-			entity.move()
-		mainWindow.update()
-		time.sleep(0.1)
-		count = count + 1
-		if count >= 20/(floor + 1) and slimeCount != 10 + 2*floor:
-			count = 0
-			slimeList.append(slime(types[slimeCount]))
-			slimeCount = slimeCount + 1
+	while health > 0 and (len(slimeList) > 0 or len(types) > 0) : # While there are still slimes on the screen or to be made and the player is still alive
+		for entity in slimeList: # For each slime on the screen
+			entity.move() # Move them towards the player or damage the player
+		mainWindow.update() # Update the results of moving them
+		time.sleep(0.1) # Wait so that animations are smoother
+		count = count + 1 # Increae the time wait
+		if count >= 20/(floor + 1) and len(types) != 0: # If there has been enough time and there are still more slimes to be made
+			count = 0 # Reset the count
+			slimeList.append(slime(types[0])) # Add the next slime to the screen
+			types.pop(0) # Remove that slime from the queue
 	
-	if len(slimeList) == 0:
-		victoryScreen()
-	else:
-		deathScreen()
+	if len(slimeList) == 0: # WHen the game is over if there are no slimes on screen
+		victoryScreen() # That means they have won
+	else: # Otherwise
+		deathScreen() # They have lost
  
-def deathScreen():
+def deathScreen(): # Function to show canvas on death
 
-	global deathCanvas
+	global deathCanvas # Use the global canvas for death
 
-	gameCanvas.destroy()
-	menubar.entryconfig("Player", state = "normal")
+	gameCanvas.destroy() # Destroy the game canvas
 
-	deathCanvas= tk.Canvas(mainWindow, bg="black", height=720, width=1280)
-	deathCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','50','bold'), text="You died...\nPress any key to return to safety.")
-	deathCanvas.focus_set()
-	deathCanvas.pack()
-	time.sleep(0.4)
-	deathCanvas.bind("<Key>", endAccept)
+	deathCanvas= tk.Canvas(mainWindow, bg="black", height=720, width=1280) # Create a canvas to display the death message, black for death
+	message = "You died...\n" # Tell them that they died
+	messsage = message + "Press any key to return to safety." # And how to return to the lobby
+	deathCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','50','bold'), text=message) # Show the message on screen
+	deathCanvas.focus_set() # Ensure the keybinds work on this canvas
+	deathCanvas.pack() # Show the canvas
+	deathCanvas.bind("<Key>", endAccept) # Bind the key presses to now affect this canvas
+	time.sleep(0.4) # Wait a bit incase they are still moving
 
-def victoryScreen():
+def victoryScreen(): # Function to show victory canvas
 
-	global victoryCanvas
+	global victoryCanvas # Use the global victory canvas
 
-	global floor
+	global floor # Obtain the stats to be updated
 	global attack
 	global hp
 
-	gameCanvas.destroy()
-	menubar.entryconfig("Player", state = "normal")
-	menubar.entryconfig("Player", state = "normal")
+	gameCanvas.destroy() # Destroy the game canvas
 
-	floor = floor + 1
+	floor = floor + 1 # Increase their stats by the exp earnt or 1 for the floor
 	hp = hp + floorExp
 	attack = attack + floorExp
-	expLeftHP = (100 * (1.5 ** (level(hp) - 1))) - attack
+	expLeftHP = (100 * (1.5 ** (level(hp) - 1))) - hp # work out how much exp they need for each next level
 	expLeftAttack = (100 * (1.5 ** (level(attack) - 1))) - attack
 
-	victoryCanvas= tk.Canvas(mainWindow, bg="gold", height=720, width=1280)
-	message = "You beat floor: " + str(floor) + "!\n"
-	message = message + "You earnt " + str(floorExp) + " exp in attack and hp from this floor.\n"
-	message = message + "Your HP is now level " + str(level(hp)) + " with " + str(expLeftHP) + " exp until the next level!\n"
-	message = message + "Your attack is now level " + str(level(attack)) + " with " + str(expLeftAttack) + " exp until the next level!\n"
-	message = message + "Press any key to return to safety."
-	victoryCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','25','bold'), text=message)
-	victoryCanvas.focus_set()
-	victoryCanvas.pack()
-	time.sleep(0.4)
-	victoryCanvas.bind("<Key>", endAccept)
+	victoryCanvas= tk.Canvas(mainWindow, bg="gold", height=720, width=1280) # Create a canvas to fill the window, gold as they are a winner
+	message = "You beat floor: " + str(floor) + "!\n" # Create the message to tell them which floor they beat
+	message = message + "You earnt " + str(floorExp) + " exp in attack and hp from this floor.\n" # How much exp they earnt
+	message = message + "Your HP is now level " + str(level(hp)) + " with " + str(expLeftHP) + " exp until the next level!\n" # What their levels are now
+	message = message + "Your attack is now level " + str(level(attack)) + " with " + str(expLeftAttack) + " exp until the next level!\n" # How much exp they need
+	message = message + "Press any key to return to safety." # Inform them how to return to the lobby
+	victoryCanvas.create_text(640, 360, fill= "white", font = ('Helvetica','25','bold'), text=message) # Display the victory message on the canvas
+	victoryCanvas.focus_set() # Ensure that later keybinds affect this canvas
+	victoryCanvas.pack() # Display the canvas
+	victoryCanvas.bind("<Key>", endAccept) # Bind the key presses to now affect this canvas
+	time.sleep(0.4) # Wait a bit incase they are still moving
+	
 	
 loginWindow() # Start off the login window
