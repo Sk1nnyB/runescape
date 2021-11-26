@@ -526,7 +526,7 @@ def control(controls): # Shows the screen of changeable controls, taking in the 
 	attackLabel = tk.Label(controlWindow, text = "Attack:")
 	attackFetch = tk.Entry(controlWindow,textvariable = attackInput)
 	bossLabel = tk.Label(controlWindow, text = "Boss Key:")
-	bossFetch = tk.Entry(controlWindow,textvariable = attackInput)
+	bossFetch = tk.Entry(controlWindow,textvariable = bossInput)
 
 	# Button that runs the function to save the new controls
 	saveButton = tk.Button(controlWindow,text = "Save", command = lambda: controlsSave([leftInput.get(), rightInput.get(), upInput.get(), downInput.get(), attackInput.get(), bossInput.get()])) 
@@ -583,6 +583,7 @@ def controlsSave(newBinds): # Attempts to see if the new controls are savable
 	if len(tempNewBinds) == len(controls): # If there are enough accepted binds
 		controls = tempNewBinds # Set them as the new controls
 		save() # And save the new controls
+		controlWindow.destroy()# Then close the controls screen
 
 def quit(): # Attempts to destroy all windows
 	
@@ -608,6 +609,10 @@ def quit(): # Attempts to destroy all windows
 	except:
 		pass
 
+	try:
+		bossWindow.destroy()
+	except:
+		pass
 
 def pause(): # Pauses the game
     tk.messagebox.showinfo(title="Paused",message="Game is paused") # Displays a pop up that stops all code until it is destroyed
@@ -1005,39 +1010,38 @@ def gameMove(): # Function for movement on the game screen
 
 # -=-=-=-=- Functions for making windows -=-=-=-=-
 
-def loginWindow():
+def loginWindow(): # Function to make the login window
 
-	global loginWindow	
+	global loginWindow	# Allow the inputs to be taken from outside the function
 	global usernameInput
 	global passwordInput
-	global errorOutput
+	global errorOutput # Allow the error label to be updated
 
-	loginWindow= tk.Tk()
+	loginWindow= tk.Tk() # Creat and size the login window
 	loginWindow.geometry("1280x720")
-	loginWindow.title("Run Escape Login")
-	loginWindow.resizable(0, 0)
+	loginWindow.title("Run Escape Login") # With the correct title
+	loginWindow.resizable(0, 0) # Do not let the user rescale
 
-	bg_login = tk.PhotoImage(file = "background_login.png")
-	bg = tk.Label(loginWindow, image=bg_login)
-	bg.place(x=0, y=0)
+	bg_login = tk.PhotoImage(file = "background_login.png") # Set the background image
+	bg = tk.Label(loginWindow, image=bg_login) # Put it on a label
+	bg.place(x=0, y=0) # And display it
 	
-	usernameInput= tk.StringVar()
+	usernameInput= tk.StringVar() # Set the contents of the input fields to variables
 	passwordInput= tk.StringVar()
 
-	nameLabel= tk.Label(loginWindow, text = "Username:")
+	nameLabel= tk.Label(loginWindow, text = "Username:") # And put each input field with a label
 	nameFetch= tk.Entry(loginWindow,textvariable = usernameInput)
 
 	passwordLabel= tk.Label(loginWindow, text = "Password:")
 	passwordFetch= tk.Entry(loginWindow, textvariable = passwordInput, show = '*')
 	 
-	loginButton= tk.Button(loginWindow,text = "Submit", command = login)
-	loginWindow.bind("<Return>", login)
-	accountButton= tk.Button(loginWindow,text = "Create Account", command = createAccount)
+	loginButton= tk.Button(loginWindow,text = "Submit", command = login) # Show the button to log in
+	accountButton= tk.Button(loginWindow,text = "Create Account", command = createAccount) # Also show the button to make a new account
 
-	errorOutput = tk.Label(loginWindow, text = "")
+	errorOutput = tk.Label(loginWindow, text = "") # Create the label for displaying error messages
 	  
-	nameLabel.grid(row=1,column=1)
-	nameFetch.grid(row=1,column=2)
+	nameLabel.grid(row=1,column=1) # Align each part in a grid, so that they are in rows of function
+	nameFetch.grid(row=1,column=2) # And the text labels are to the left
 	passwordLabel.grid(row=2,column=1)
 	passwordFetch.grid(row=2,column=2)
 	loginButton.grid(row=4,column=2)
@@ -1091,9 +1095,10 @@ def mainWindow():
 
 	mainScreen() 
 
-def bossWindow():
-	mainWindow.wm_state('iconic')
-	pause()
+def bossWindow(): # Function to minimise the screen for a boss key
+
+	mainWindow.wm_state('iconic') # Minimise the main screen
+
 
 # -=-=-=-=- Functions for making screens -=-=-=-=-
 
@@ -1136,6 +1141,8 @@ def mainScreen():
 	
 	mainCanvas= tk.Canvas(mainWindow, bg="green", height=720, width=1280)
 	mainCanvas.pack()
+
+	menubar.entryconfig("Save", state = "normal")
 
 	doorModel = tk.PhotoImage(file="dungeon_door.png")
 	doorModel = doorModel.subsample(6)
